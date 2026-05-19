@@ -59,12 +59,21 @@
 
 | 层次 | 技术 | 说明 |
 |------|------|------|
-| 前端框架 | Tauri + React | 轻量桌面应用,打包体积小 |
-| 本地数据库 | SQLite | 日记、情绪标签、家庭背景数据 |
-| 向量检索 | lanceDB (本地) | 历史日记语义搜索 |
-| AI 模型 | DeepSeek API / Ollama 本地部署 | 支持离线使用,数据不出本机 |
-| 加密 | SQLCipher | 日记内容加密存储 |
-| 图表 | ECharts / Recharts | 情绪趋势可视化 |
+| 桌面壳 | Electron 33.x | 生态最成熟，Node.js 与 Java 进程通信便捷 |
+| 前端框架 | React 18 + TypeScript 5.x | 生态最成熟，类型安全 |
+| 构建工具 | Vite 6.x | HMR < 100ms，Electron 热重载友好 |
+| CSS 方案 | Tailwind CSS 4.x | 原子化 CSS，零运行时开销 |
+| 状态管理 | Zustand 5.x | 1KB 体积，无 boilerplate，按需订阅 |
+| 路由 | React Router 7.x | 标准 SPA 路由，数据加载模式 |
+| 图表 | Recharts 2.x | React 原生 SVG 组件，包体 ~300KB |
+| 后端语言 | Java 21 LTS | 虚拟线程、记录类型、模式匹配 |
+| 后端框架 | Spring Boot 3.4.x | 生态最全，内嵌 Tomcat，自动配置 |
+| 构建工具 | Gradle Kotlin DSL 8.x | 现代化构建，比 Maven 简洁 |
+| 本地数据库 | SQLite (JDBC) | 嵌入式零配置，数据不外泄 |
+| 数据库加密 | AES-256-GCM (JCA) | 应用层字段级加密，JCA 内建零依赖 |
+| 向量检索 | JVector (嵌入式) | 纯 Java，基于 DiskANN 算法，零配置 |
+| AI 主模型 | DeepSeek Chat API | 中文 SOTA，成本极低，长上下文 |
+| AI 备选 | Ollama 本地部署 | 完全离线，qwen2.5 或 deepseek-r1 |
 
 ## 5. 核心数据结构
 

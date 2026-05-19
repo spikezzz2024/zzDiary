@@ -10,16 +10,16 @@
 | 分层 | 选型 | 版本 | 选型理由 |
 |------|------|------|----------|
 | 桌面壳 | Electron | 33.x | 生态最成熟，Node.js 与 Java 进程通信便捷 |
-| 前端框架 | React + TypeScript | 18+ / 5.x | 生态最成熟，类型安全 |
-| 构建工具 | Vite | 6.x | HMR < 100ms，Electron 热重载友好 |
+| 前端框架 | React + TypeScript | 19.x / 6.x | 生态最成熟，类型安全 |
+| 构建工具 | Vite | 8.x | HMR < 100ms，Electron 热重载友好 |
 | CSS 方案 | Tailwind CSS | 4.x | 原子化 CSS，零运行时开销 |
 | 状态管理 | Zustand | 5.x | 1KB 体积，无 boilerplate，按需订阅 |
 | 路由 | React Router | 7.x | 标准 SPA 路由，数据加载模式 |
-| 图表 | Recharts | 2.x | React 原生组件，比 ECharts 轻 60% |
+| 图表 | Recharts | 3.x | React 原生组件，比 ECharts 轻 60% |
 | 图标 | Lucide React | 最新 | 树摇友好，1500+ MIT 图标 |
-| 后端语言 | Java | 21 LTS | 虚拟线程、记录类型、模式匹配 |
-| 后端框架 | Spring Boot | 3.4.x | 生态最全，内嵌 Tomcat，自动配置 |
-| 构建工具 | Gradle (Kotlin DSL) | 8.x | 现代化构建，比 Maven 简洁 40% 配置量 |
+| 后端语言 | Java | 25 LTS | 虚拟线程、记录类型、模式匹配 |
+| 后端框架 | Spring Boot | 3.5.x | 生态最全，内嵌 Tomcat，自动配置 |
+| 构建工具 | Gradle (Kotlin DSL) | 9.x | 现代化构建，比 Maven 简洁 |
 | 数据库 | SQLite (JDBC) | 最新 | 嵌入式零配置，数据不外泄 |
 | 数据库加密 | 应用层 AES-256-GCM | — | JCA 内建，无第三方依赖 |
 | 向量检索 | JVector | 最新 | 纯 Java 嵌入式，无外部服务依赖 |
@@ -161,7 +161,7 @@ interface DiaryStore {
 - `<PieChart>` — 情绪标签占比
 - `<AreaChart>` — 情绪强度变化
 
-### 2.5 后端服务 — Spring Boot 3.4
+### 2.5 后端服务 — Spring Boot 3.5
 
 ```
 ┌──────────────────────────────────────────┐
@@ -206,13 +206,13 @@ spring:
     driver-class-name: org.sqlite.JDBC
   threads:
     virtual:
-      enabled: true           # 启用 Java 21 虚拟线程
+      enabled: true           # 启用虚拟线程 (Java 21+)
 ```
 
 **为什么用 Spring Boot 而非 Quarkus / Micronaut：**
 - Spring Boot 生态最成熟，开发者基数最大
 - SQLite JDBC 支持最好，第三方库兼容性最广
-- Java 21 虚拟线程弥补了传统 Servlet 的并发短板
+- Java 25 虚拟线程弥补了传统 Servlet 的并发短板
 
 ### 2.6 数据库 — SQLite (JDBC) + 应用层加密
 
@@ -367,7 +367,7 @@ Spring Boot ──HTTPS──▶ DeepSeek API (api.deepseek.com)
 Spring Boot ──HTTP───▶ Ollama (localhost:11434)
 ```
 
-- 使用 Spring `RestClient`（基于 Java 21 虚拟线程）
+- 使用 Spring `RestClient`（基于 Java 25 虚拟线程）
 - API Key 通过 `application.yml` 或环境变量注入
 - 请求超时 30s，失败自动降级
 
@@ -392,9 +392,9 @@ Spring Boot ──HTTP───▶ Ollama (localhost:11434)
 | 项目 | 最低版本 |
 |------|----------|
 | Node.js | 20 LTS |
-| Java JDK | 21 LTS (含 jlink) |
+| Java JDK | 25 LTS (含 jlink) |
 | pnpm | 9.x（前端包管理） |
-| Gradle | 8.x（或使用 Gradle Wrapper） |
+| Gradle | 9.x（或使用 Gradle Wrapper） |
 | Electron | 33.x |
 | Ollama | 最新（可选，离线模式需要） |
 

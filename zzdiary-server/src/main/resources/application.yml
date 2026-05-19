@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: zzdiary-server
+  datasource:
+    url: jdbc:sqlite:${user.home}/.zzdiary/data.db
+    driver-class-name: org.sqlite.JDBC
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  port: 0
+  address: 127.0.0.1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
