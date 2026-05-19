@@ -1,0 +1,25 @@
+# Windows
+desktop.ini
+Thumbs.db
+
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+
+# Build
+dist/
+build/
+*.class
