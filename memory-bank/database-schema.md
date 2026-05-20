@@ -9,6 +9,8 @@
 
 | 表名 | 说明 | 加密字段 |
 |------|------|----------|
+| app_users | 本地账户（邮箱+密码哈希+加密盐） | 无（密码已哈希） |
+| ai_settings | AI 引擎配置 | deepseek_api_key |
 | diary_entries | 日记条目 | content（日记正文） |
 | emotion_insights | 情绪分析结果 | possible_root_cause |
 | family_background | 原生家庭背景 | childhood_summary, significant_events |
@@ -67,3 +69,24 @@
 - 加密算法：AES-256-GCM（JCA 内建），密钥由 PBKDF2 派生自用户密码
 - 每表不超过 12 字段
 - 外键约束确保引用完整性
+
+---
+
+## app_users
+
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | INTEGER | PK AUTOINCREMENT | 主键 |
+| email | TEXT | NOT NULL UNIQUE | 本地标识 |
+| password_hash | TEXT | NOT NULL | PBKDF2 哈希（格式：hex(salt):hex(hash)） |
+| encryption_salt | BLOB | NOT NULL | 加密密钥派生盐 |
+
+## ai_settings
+
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | INTEGER | PK AUTOINCREMENT | 主键（仅存一行） |
+| mode | TEXT | NOT NULL DEFAULT 'ollama' | "ollama" / "deepseek" |
+| deepseek_api_key | TEXT | | 用户 DeepSeek API Key |
+| ollama_model | TEXT | DEFAULT 'qwen2.5:7b' | Ollama 模型名 |
+| ollama_base_url | TEXT | DEFAULT 'http://localhost:11434' | Ollama 地址 |

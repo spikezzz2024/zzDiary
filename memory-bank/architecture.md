@@ -38,10 +38,12 @@
 ```
 src/
 ├── features/          # 业务模块（按业务拆分）
+│   ├── auth/          # 账户管理（SetupScreen, UnlockScreen, auth.store）
 │   ├── diary/         # 日记书写（Editor, GuidedChat, store, types）
 │   ├── emotion/       # 情绪分析（Dashboard, TrendChart, store, types）
 │   ├── family/        # 原生家庭（BackgroundForm, InsightPanel, store, types）
-│   └── mindfulness/   # 正念练习（ExercisePlayer, GratitudeTemplate, store, types）
+│   ├── mindfulness/   # 正念练习（ExercisePlayer, GratitudeTemplate, store, types）
+│   └── settings/      # 应用设置（AiSettingsPage, settings.store）
 ├── components/ui/     # 纯 UI 原子组件（Button, Input, Modal, Badge, Card）
 ├── hooks/             # 通用 Hooks（useApi, useDebounce）
 ├── lib/               # API 客户端 + 常量
