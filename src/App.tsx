@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Link, useNavigate } from 'react-router';
+import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router';
 import { useAuthStore } from './features/auth/auth.store';
 import SetupScreen from './features/auth/SetupScreen';
 import UnlockScreen from './features/auth/UnlockScreen';
 import AiSettingsPage from './features/settings/AiSettingsPage';
+import DiaryPage from './features/diary/DiaryPage';
 
 function AuthGate({ children }: { children: React.ReactNode }) {
   const { initialized, unlocked, loading, checkStatus } = useAuthStore();
@@ -57,15 +58,7 @@ function MainLayout() {
       </header>
       <main className="mx-auto max-w-4xl px-6 py-8">
         <Routes>
-          <Route
-            path="/"
-            element={
-              <div className="flex flex-col items-center justify-center gap-4 py-20">
-                <h2 className="text-2xl font-medium">欢迎使用 zzDiary</h2>
-                <p className="text-gray-500">你的正念日记伴侣</p>
-              </div>
-            }
-          />
+          <Route path="/" element={<DiaryPage />} />
           <Route path="/settings" element={<AiSettingsPage />} />
         </Routes>
       </main>
