@@ -13,10 +13,6 @@
 | GET | `/api/diary/list` | 获取日记列表（分页） | DiaryController |
 | GET | `/api/diary/{id}` | 获取单篇日记 | DiaryController |
 | DELETE | `/api/diary/{id}` | 删除日记 | DiaryController |
-| GET | `/api/auth/status` | 获取账户状态 | AuthController |
-| POST | `/api/auth/setup` | 首次创建账户 | AuthController |
-| POST | `/api/auth/unlock` | 密码解锁应用 | AuthController |
-| POST | `/api/auth/lock` | 锁定应用 | AuthController |
 | GET | `/api/settings/ai` | 获取 AI 配置 | SettingsController |
 | PUT | `/api/settings/ai` | 更新 AI 配置 | SettingsController |
 | GET | `/api/settings/ollama/status` | Ollama 连接状态 | SettingsController |

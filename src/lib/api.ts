@@ -1,7 +1,6 @@
 import type {
   AnalyzeRequest,
   AnalyzeResponse,
-  AuthStatus,
   AiSettings,
   DiaryEntryDto,
 } from '../types/shared';
@@ -35,16 +34,6 @@ function put<T>(url: string, body: unknown): Promise<T> {
 function del<T>(url: string): Promise<T> {
   return request<T>(url, { method: 'DELETE' });
 }
-
-// Auth
-export const authApi = {
-  status: () => get<AuthStatus>('/auth/status'),
-  setup: (email: string, password: string) =>
-    post<{ email: string; message: string }>('/auth/setup', { email, password }),
-  unlock: (password: string) =>
-    post<{ email: string; message: string }>('/auth/unlock', { password }),
-  lock: () => post<{ message: string }>('/auth/lock', {}),
-};
 
 // Diary
 export const diaryApi = {

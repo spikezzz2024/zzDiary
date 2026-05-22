@@ -38,7 +38,6 @@
 ```
 src/
 ├── features/          # 业务模块（按业务拆分）
-│   ├── auth/          # ✅ 账户管理（SetupScreen, UnlockScreen, auth.store）
 │   ├── diary/         # ✅ 日记书写（DiaryPage, Editor, GuidedChat, store, types）
 │   ├── emotion/       # ✅ 情绪分析结果展示（EmotionResult, store, types）
 │   ├── family/        # ⬜ 原生家庭（BackgroundForm, InsightPanel, store, types）

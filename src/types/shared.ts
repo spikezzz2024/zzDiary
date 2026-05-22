@@ -21,12 +21,6 @@ export interface DiaryEntryDto {
   createdAt: string;
 }
 
-export interface AuthStatus {
-  initialized: boolean;
-  unlocked: boolean;
-  email: string | null;
-}
-
 export interface AiSettings {
   mode: 'ollama' | 'deepseek';
   deepseekApiKey: string | null;

@@ -2,50 +2,51 @@ package com.zzdiary.infrastructure.encryption;
 
 import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.KeyGenerator;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.SecureRandom;
-import java.security.spec.KeySpec;
 
 @Component
 public class KeyManager {
 
-    private static final int PBKDF2_ITERATIONS = 600_000;
-    private static final int KEY_LENGTH = 256;
-    private static final int SALT_LENGTH = 32;
+    private static final String ALGORITHM = "AES";
+    private static final int KEY_SIZE = 256;
 
     private volatile SecretKeySpec keySpec;
 
-    public boolean isUnlocked() {
-        return keySpec != null;
-    }
-
     public SecretKeySpec getKey() {
         if (keySpec == null) {
-            throw new IllegalStateException("应用未解锁，请先登录");
+            synchronized (this) {
+                if (keySpec == null) {
+                    keySpec = loadOrGenerateKey();
+                }
+            }
         }
         return keySpec;
     }
 
-    public byte[] generateSalt() {
-        byte[] salt = new byte[SALT_LENGTH];
-        new SecureRandom().nextBytes(salt);
-        return salt;
-    }
-
-    public void unlock(String password, byte[] salt) {
+    private SecretKeySpec loadOrGenerateKey() {
         try {
-            KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, PBKDF2_ITERATIONS, KEY_LENGTH);
-            var factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-            byte[] keyBytes = factory.generateSecret(spec).getEncoded();
-            this.keySpec = new SecretKeySpec(keyBytes, "AES");
+            Path keyFile = getKeyPath();
+            if (Files.exists(keyFile)) {
+                byte[] keyBytes = Files.readAllBytes(keyFile);
+                return new SecretKeySpec(keyBytes, ALGORITHM);
+            }
+            KeyGenerator keyGen = KeyGenerator.getInstance(ALGORITHM);
+            keyGen.init(KEY_SIZE, new SecureRandom());
+            byte[] keyBytes = keyGen.generateKey().getEncoded();
+            Files.createDirectories(keyFile.getParent());
+            Files.write(keyFile, keyBytes);
+            return new SecretKeySpec(keyBytes, ALGORITHM);
         } catch (Exception e) {
             throw new RuntimeException("密钥初始化失败", e);
         }
     }
 
-    public void lock() {
-        this.keySpec = null;
+    private static Path getKeyPath() {
+        String userHome = System.getProperty("user.home");
+        return Path.of(userHome, ".zzdiary", "encryption.key");
     }
 }

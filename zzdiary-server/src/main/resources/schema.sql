@@ -22,13 +22,6 @@ CREATE TABLE IF NOT EXISTS emotion_insights (
     FOREIGN KEY (entry_id) REFERENCES diary_entries(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS app_users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT NOT NULL UNIQUE,
-    password_hash TEXT NOT NULL,
-    encryption_salt BLOB NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS ai_settings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     mode TEXT NOT NULL DEFAULT 'ollama' CHECK (mode IN ('ollama', 'deepseek')),
