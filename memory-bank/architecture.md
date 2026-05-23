@@ -88,12 +88,10 @@ zzdiary-server/src/main/java/com/zzdiary/
   → lib/api.ts (POST /api/diary/analyze)
   → DiaryController (参数校验)
   → DiaryService (编排)
-    → SanitizationService (PII 脱敏)
-    → AiService (DeepSeek/Ollama 情绪分析)
-    → EncryptionService (AES-256-GCM 加密)
-    → DiaryRepository (SQLite 存储)
-  ← EmotionInsight (JSON)
-  ← React 渲染分析结果
+    → SanitizationService (PII 脱敏) → AiService (情绪分析)
+    → EncryptionService (加密日记原文) → DiaryRepository (SQLite 存储)
+  ← AnalyzeResponse (JSON, 分析结果不入库)
+  ← React 渲染分析结果（侧边栏，会话内有效）
 ```
 
 ## 外部通信

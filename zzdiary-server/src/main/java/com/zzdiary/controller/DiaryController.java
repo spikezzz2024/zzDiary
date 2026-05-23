@@ -3,6 +3,7 @@ package com.zzdiary.controller;
 import com.zzdiary.model.dto.AnalyzeRequest;
 import com.zzdiary.model.dto.AnalyzeResponse;
 import com.zzdiary.model.dto.DiaryEntryDto;
+import com.zzdiary.model.dto.SaveRequest;
 import com.zzdiary.service.DiaryService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,11 @@ public class DiaryController {
         this.diaryService = diaryService;
     }
 
+    @PostMapping("/save")
+    public ResponseEntity<DiaryEntryDto> save(@RequestBody @Valid SaveRequest request) {
+        return ResponseEntity.ok(diaryService.saveToday(request.content()));
+    }
+
     @PostMapping("/analyze")
     public ResponseEntity<AnalyzeResponse> analyze(@RequestBody @Valid AnalyzeRequest request) {
         return ResponseEntity.ok(diaryService.analyze(request));
@@ -33,6 +39,16 @@ public class DiaryController {
         return ResponseEntity.ok(diaryService.list(page, size));
     }
 
+    @GetMapping("/dates")
+    public ResponseEntity<List<String>> getDates() {
+        return ResponseEntity.ok(diaryService.getDatesWithEntries());
+    }
+
+    @GetMapping("/by-date")
+    public ResponseEntity<List<DiaryEntryDto>> getByDate(@RequestParam String date) {
+        return ResponseEntity.ok(diaryService.findByDate(date));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<DiaryEntryDto> getById(@PathVariable Long id) {
         return ResponseEntity.ok(diaryService.findById(id));
@@ -42,5 +58,10 @@ public class DiaryController {
     public ResponseEntity<Map<String, Object>> delete(@PathVariable Long id) {
         diaryService.delete(id);
         return ResponseEntity.ok(Map.of("deleted", true, "id", id));
+    }
+
+    @PostMapping("/{id}/analyze")
+    public ResponseEntity<AnalyzeResponse> analyzeEntry(@PathVariable Long id) {
+        return ResponseEntity.ok(diaryService.analyzeExisting(id));
     }
 }

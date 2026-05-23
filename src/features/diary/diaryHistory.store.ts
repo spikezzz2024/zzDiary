@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { diaryApi } from '../../lib/api';
-import type { DiaryEntryDto } from '../../types/shared';
+import type { DiaryEntryDto, AnalyzeResponse } from '../../types/shared';
 
 interface DiaryHistoryState {
   entries: DiaryEntryDto[];
@@ -10,10 +10,20 @@ interface DiaryHistoryState {
   page: number;
   hasMore: boolean;
   error: string | null;
+  datesWithEntries: string[];
+  datesLoading: boolean;
+  selectedDate: string | null;
+  analyzingEntryId: number | null;
+  entryAnalysis: AnalyzeResponse | null;
   fetchList: (page?: number) => Promise<void>;
   fetchDetail: (id: number) => Promise<void>;
+  fetchByDate: (date: string) => Promise<void>;
+  fetchDates: () => Promise<void>;
   deleteEntry: (id: number) => Promise<void>;
+  analyzeEntry: (id: number) => Promise<void>;
+  clearAnalysis: () => void;
   clearDetail: () => void;
+  setSelectedDate: (date: string | null) => void;
 }
 
 export const useDiaryHistoryStore = create<DiaryHistoryState>((set) => ({
@@ -24,6 +34,11 @@ export const useDiaryHistoryStore = create<DiaryHistoryState>((set) => ({
   page: 0,
   hasMore: true,
   error: null,
+  datesWithEntries: [],
+  datesLoading: false,
+  selectedDate: null,
+  analyzingEntryId: null,
+  entryAnalysis: null,
 
   fetchList: async (page?: number) => {
     const targetPage = page ?? 0;
@@ -51,6 +66,26 @@ export const useDiaryHistoryStore = create<DiaryHistoryState>((set) => ({
     }
   },
 
+  fetchByDate: async (date: string) => {
+    set({ loading: true, error: null, selectedDate: date });
+    try {
+      const data = await diaryApi.getByDate(date);
+      set({ entries: data, loading: false });
+    } catch (e) {
+      set({ error: (e as Error).message, loading: false });
+    }
+  },
+
+  fetchDates: async () => {
+    set({ datesLoading: true });
+    try {
+      const dates = await diaryApi.getDates();
+      set({ datesWithEntries: dates, datesLoading: false });
+    } catch {
+      set({ datesLoading: false });
+    }
+  },
+
   deleteEntry: async (id: number) => {
     set({ loading: true, error: null });
     try {
@@ -65,5 +100,19 @@ export const useDiaryHistoryStore = create<DiaryHistoryState>((set) => ({
     }
   },
 
-  clearDetail: () => set({ currentEntry: null }),
+  analyzeEntry: async (id: number) => {
+    set({ analyzingEntryId: id, error: null });
+    try {
+      const result = await diaryApi.analyzeEntry(id);
+      set({ entryAnalysis: result, analyzingEntryId: null });
+    } catch (e) {
+      set({ error: (e as Error).message, analyzingEntryId: null });
+    }
+  },
+
+  clearAnalysis: () => set({ entryAnalysis: null, analyzingEntryId: null }),
+
+  clearDetail: () => set({ currentEntry: null, entryAnalysis: null }),
+
+  setSelectedDate: (date) => set({ selectedDate: date }),
 }));

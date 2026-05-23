@@ -1,5 +1,105 @@
 # zzDiary 开发日志
 
+## 2026-05-23 (下午 2) — 日记自动保存草稿
+
+### 新增文件 (1)
+
+| 文件 | 说明 |
+|------|------|
+| `zzdiary-server/.../model/dto/SaveRequest.java` | 保存日记请求 DTO |
+
+### 修改文件 (4)
+
+| 文件 | 变更 |
+|------|------|
+| `zzdiary-server/.../controller/DiaryController.java` | 新增 `POST /api/diary/save` 端点 |
+| `zzdiary-server/.../service/DiaryService.java` | 新增 `saveToday()`：同一天仅保留一份日记，再次保存覆盖更新 |
+| `zzdiary-server/.../repository/DiaryRepository.java` | 新增 `findTodayEntry()` / `updateContent()` |
+| `src/features/diary/diary.store.ts` | 新增 `saveDraft()` / `loadTodayDraft()` / `draftId`；`analyze()` 改为先保存再通过 `analyzeEntry(id)` 分析 |
+| `src/features/diary/DiaryPage.tsx` | 页面挂载时加载今日草稿；输入停止 2 秒后自动保存；关闭标签页/窗口前通过 `sendBeacon` 保存；工具栏显示"保存中..."状态 |
+| `src/lib/api.ts` | 新增 `saveToday()` API 方法 |
+
+### 设计决策
+
+- 自动保存防抖 2 秒，避免频繁写入
+- `beforeunload` 使用 `navigator.sendBeacon` 发送，确保页面关闭前数据发出
+- 同一个自然日只保留一份日记条目，后续保存覆盖之前内容
+- 分析流程：先 `saveToday` 保存最新内容 → 再 `analyzeEntry(id)` 执行 AI 分析
+
+---
+
+## 2026-05-23 (下午) — 历史日历查询 + AI 分析不持久化
+
+### 新增文件 (1)
+
+| 文件 | 说明 |
+|------|------|
+| `src/features/diary/Calendar.tsx` | 纸张风格月历组件：点击日期查询当天日记，有日记的日期显示小圆点标记，今天/选中日期高亮，月份切换 |
+
+### 修改文件 (7)
+
+| 文件 | 变更 |
+|------|------|
+| `zzdiary-server/.../controller/DiaryController.java` | 新增 `GET /api/diary/dates`（有日记的日期列表）、`GET /api/diary/by-date?date=`（按日期查询）、`POST /api/diary/{id}/analyze`（对已有日记执行分析） |
+| `zzdiary-server/.../service/DiaryService.java` | `analyze()` 不再持久化 emotion_insights；新增 `analyzeExisting()` 供历史日记分析；新增 `findByDate()` / `getDatesWithEntries()`；移除 `EmotionInsightRepository` 依赖 |
+| `zzdiary-server/.../repository/DiaryRepository.java` | 新增 `findByDate()` / `findDistinctDates()` 查询方法 |
+| `src/lib/api.ts` | 新增 `analyzeEntry()` / `getByDate()` / `getDates()` API 方法 |
+| `src/features/diary/diaryHistory.store.ts` | 新增日历相关状态（datesWithEntries、selectedDate）、`fetchByDate()` / `fetchDates()` / `analyzeEntry()` / `clearAnalysis()` |
+| `src/features/diary/DiaryHistoryPage.tsx` | 重构：日历选日 + 当天日记列表替代分页列表，移除模式标签 |
+| `src/features/diary/DiaryDetailPage.tsx` | 新增"分析情绪"按钮，手动触发 AI 分析并展示结果；移除模式标签、旧版情绪分析面板 |
+
+### 删除文件 (1)
+
+| 文件 | 说明 |
+|------|------|
+| `src/features/emotion/EmotionResult.tsx` | 已被 AnalysisSidebar 替代，死代码清理 |
+
+### 设计决策
+
+- AI 分析结果不再持久化到 emotion_insights 表，仅在当前会话展示
+- 历史日记不再展示旧版情绪数据（仍存在于旧条目的 DB 中，但前端不读取）
+- 日历完全 CSS 实现，无第三方日期库依赖
+- 日历视觉风格匹配纸张主题（CSS 变量），楷体字月标题，圆点标记有日记的日期
+
+---
+
+## 2026-05-23 — 前端美化：作文纸编辑器 + 侧边栏分析 + 纸张风格切换
+
+### 新增文件 (4)
+
+| 文件 | 说明 |
+|------|------|
+| `src/features/diary/paper.store.ts` | 纸张偏好 Zustand store：材质（方格/横线/素白）+ 颜色主题（经典米黄/宣纸素白/暗夜暖灯/护眼青绿），localStorage 持久化 |
+| `src/features/diary/PaperEditor.tsx` | 作文纸风格编辑器：CSS 网格/横线背景、红色边线、楷体字、纸张纹理叠加、字数统计、分析触发按钮 |
+| `src/features/diary/AnalysisSidebar.tsx` | 侧边栏分析面板：柔和语言呈现情绪标签、强度条、认知偏差、根本原因、正念建议，替代原有对话框式结果卡片 |
+| `src/features/diary/PaperStylePicker.tsx` | 纸张风格下拉选择器：材质三选一（含迷你预览）、颜色四选一（色块），点击外部自动关闭 |
+
+### 修改文件 (4)
+
+| 文件 | 变更 |
+|------|------|
+| `src/features/diary/DiaryPage.tsx` | 重构为左右分栏布局：作文纸编辑器占主体，分析结果从右侧滑入侧边栏。移除自由/引导模式切换，统一为自由书写。顶部工具栏含纸张风格选择器。加载骨架屏移至侧边栏区域。 |
+| `src/features/diary/diary.store.ts` | 精简：移除 chatMessages / mode / addChatMessage / clearChat / setMode，仅保留 free writing + analyze 流程 |
+| `src/App.tsx` | 最大宽度扩至 1280px 容纳分栏布局，header 改为暖色调（米色系），导航文案调整（"日记"→"书写"，"历史"→"日记本"） |
+| `src/index.css` | 新增 4 套纸张颜色主题 CSS 变量（classic/rice/dark/blue），3 种纸张材质背景图案（grid/lined/blank），纸张纹理伪元素叠加层，`:root` 默认主题回退 |
+
+### 删除文件 (3)
+
+| 文件 | 说明 |
+|------|------|
+| `src/features/diary/Editor.tsx` | 被 PaperEditor 替代 |
+| `src/features/diary/GuidedChat.tsx` | 对话框式引导被侧边栏分析替代 |
+| `src/features/diary/types.ts` | WriteMode / ChatMessage 类型不再需要 |
+
+### 设计决策
+
+- AI 分析结果从卡片式底部展示改为侧边栏平铺，语言从临床标签改为柔和叙述（"感受到的情绪" / "可能的缘由" / "思维习惯"），避免诘问感
+- 纸张材质完全用 CSS `repeating-linear-gradient` 实现，无图片依赖；方格对齐行高 32px，横线对齐行高 29px
+- 红色边线仅 grid/lined 模式显示，blank 模式隐藏，还原真实作文纸特征
+- 纸张偏好通过 Zustand + localStorage 持久化，跨会话保留
+
+---
+
 ## 2026-05-22 — 移除账号登录注册功能
 
 ### 删除文件 (9)

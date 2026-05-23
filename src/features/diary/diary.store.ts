@@ -1,46 +1,72 @@
 import { create } from 'zustand';
 import { diaryApi } from '../../lib/api';
 import type { AnalyzeResponse } from '../../types/shared';
-import type { WriteMode, ChatMessage } from './types';
 
 interface DiaryState {
   content: string;
-  mode: WriteMode;
+  draftId: number | null;
+  draftLoaded: boolean;
+  saving: boolean;
   analyzing: boolean;
   currentResult: AnalyzeResponse | null;
   error: string | null;
-  chatMessages: ChatMessage[];
   setContent: (content: string) => void;
-  setMode: (mode: WriteMode) => void;
+  saveDraft: () => Promise<void>;
+  loadTodayDraft: () => Promise<void>;
   analyze: () => Promise<void>;
   clearResult: () => void;
-  addChatMessage: (msg: ChatMessage) => void;
-  clearChat: () => void;
 }
 
 export const useDiaryStore = create<DiaryState>((set, get) => ({
   content: '',
-  mode: 'free',
+  draftId: null,
+  draftLoaded: false,
+  saving: false,
   analyzing: false,
   currentResult: null,
   error: null,
-  chatMessages: [],
 
   setContent: (content) => set({ content }),
 
-  setMode: (mode) => set({ mode }),
+  saveDraft: async () => {
+    const { content, saving } = get();
+    if (saving || !content.trim()) return;
+    set({ saving: true });
+    try {
+      const entry = await diaryApi.saveToday(content);
+      set({ draftId: entry.id, saving: false });
+    } catch {
+      set({ saving: false });
+    }
+  },
+
+  loadTodayDraft: async () => {
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    try {
+      const entries = await diaryApi.getByDate(dateStr);
+      if (entries.length > 0) {
+        const latest = entries[0];
+        set({ content: latest.content, draftId: latest.id, draftLoaded: true });
+      } else {
+        set({ draftLoaded: true });
+      }
+    } catch {
+      set({ draftLoaded: true });
+    }
+  },
 
   analyze: async () => {
-    const { content, chatMessages } = get();
-    const textToAnalyze = content || chatMessages.map(
-      (m) => `${m.role === 'user' ? '我' : 'AI'}: ${m.content}`
-    ).join('\n');
-
-    if (!textToAnalyze.trim()) return;
+    const { content, draftId } = get();
+    if (!content.trim()) return;
 
     set({ analyzing: true, error: null });
     try {
-      const result = await diaryApi.analyze({ content: textToAnalyze });
+      // Re-save before analyzing to ensure latest content
+      const entry = await diaryApi.saveToday(content);
+      set({ draftId: entry.id });
+
+      const result = await diaryApi.analyzeEntry(entry.id);
       set({ currentResult: result, analyzing: false });
     } catch (e) {
       set({ error: (e as Error).message, analyzing: false });
@@ -48,9 +74,4 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
   },
 
   clearResult: () => set({ currentResult: null }),
-
-  addChatMessage: (msg) =>
-    set((s) => ({ chatMessages: [...s.chatMessages, msg] })),
-
-  clearChat: () => set({ chatMessages: [] }),
 }));

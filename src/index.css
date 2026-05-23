@@ -2,11 +2,156 @@
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Noto Serif SC', 'Source Han Serif SC', 'STSong', 'SimSun', 'KaiTi', serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
   min-height: 100vh;
+}
+
+/* Default paper theme (classic) */
+:root {
+  --paper-bg: #fdf5e6;
+  --paper-grid: #d4c5a0;
+  --paper-line: #c8b896;
+  --paper-margin: #c87878;
+  --paper-text: #4a3728;
+  --paper-text-secondary: #8b7355;
+  --paper-accent: #b8860b;
+  --paper-border: #d4c5a0;
+  --sidebar-bg: #faf6ee;
+}
+
+/* ===== Paper Color Themes ===== */
+
+[data-paper-color="classic"] {
+  --paper-bg: #fdf5e6;
+  --paper-grid: #d4c5a0;
+  --paper-line: #c8b896;
+  --paper-margin: #c87878;
+  --paper-text: #4a3728;
+  --paper-text-secondary: #8b7355;
+  --paper-accent: #b8860b;
+  --paper-border: #d4c5a0;
+  --sidebar-bg: #faf6ee;
+}
+
+[data-paper-color="rice"] {
+  --paper-bg: #faf8f5;
+  --paper-grid: #d8d0c0;
+  --paper-line: #ccc4b4;
+  --paper-margin: #b8967a;
+  --paper-text: #3d3226;
+  --paper-text-secondary: #8c8070;
+  --paper-accent: #8b6914;
+  --paper-border: #d8d0c0;
+  --sidebar-bg: #f7f4ef;
+}
+
+[data-paper-color="dark"] {
+  --paper-bg: #2c2416;
+  --paper-grid: #4a3f2f;
+  --paper-line: #3d3528;
+  --paper-margin: #8b5e5e;
+  --paper-text: #e8dcc8;
+  --paper-text-secondary: #a89880;
+  --paper-accent: #d4a844;
+  --paper-border: #4a3f2f;
+  --sidebar-bg: #322b1e;
+}
+
+[data-paper-color="blue"] {
+  --paper-bg: #e8f0e8;
+  --paper-grid: #b8c8b8;
+  --paper-line: #acbcac;
+  --paper-margin: #8fa89a;
+  --paper-text: #2d3a2d;
+  --paper-text-secondary: #5a6b5a;
+  --paper-accent: #4a7c59;
+  --paper-border: #b8c8b8;
+  --sidebar-bg: #e0eae0;
+}
+
+/* ===== Paper Materials ===== */
+
+/* Grid paper (田字格 / 作文纸) */
+.paper-grid {
+  background-color: var(--paper-bg);
+  background-image:
+    /* Horizontal lines */
+    repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 31px,
+      var(--paper-grid) 31px,
+      var(--paper-grid) 32px
+    ),
+    /* Vertical lines */
+    repeating-linear-gradient(
+      to right,
+      transparent,
+      transparent 31px,
+      var(--paper-grid) 31px,
+      var(--paper-grid) 32px
+    );
+  background-position: 0 0, 0 0;
+}
+
+/* Lined paper (横线纸) */
+.paper-lined {
+  background-color: var(--paper-bg);
+  background-image:
+    /* Horizontal lines */
+    repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 28px,
+      var(--paper-line) 28px,
+      var(--paper-line) 29px
+    ),
+    /* Left margin line */
+    linear-gradient(
+      to right,
+      var(--paper-margin) 0px,
+      var(--paper-margin) 1px,
+      transparent 1px,
+      transparent 100%
+    );
+  background-position: 0 0, 0 0;
+}
+
+/* Blank paper (白纸) */
+.paper-blank {
+  background-color: var(--paper-bg);
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(0,0,0,0.01) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(0,0,0,0.01) 0%, transparent 50%);
+}
+
+/* ===== Sidebar ===== */
+
+.sidebar-panel {
+  background-color: var(--sidebar-bg);
+  border-left: 1px solid var(--paper-border);
+  color: var(--paper-text);
+}
+
+/* ===== Paper texture overlay ===== */
+
+.paper-texture::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(180, 160, 120, 0.03) 2px,
+      rgba(180, 160, 120, 0.03) 4px
+    );
+  border-radius: inherit;
 }

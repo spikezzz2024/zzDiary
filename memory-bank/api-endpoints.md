@@ -9,10 +9,14 @@
 
 | 方法 | 路径 | 说明 | 所属 Controller |
 |------|------|------|-----------------|
-| POST | `/api/diary/analyze` | AI 分析日记内容 | DiaryController |
+| POST | `/api/diary/save` | 保存/更新今日日记草稿（同一天覆盖） | DiaryController |
+| POST | `/api/diary/analyze` | 保存日记并返回 AI 分析（分析结果不入库） | DiaryController |
 | GET | `/api/diary/list` | 获取日记列表（分页） | DiaryController |
+| GET | `/api/diary/dates` | 获取有日记的所有日期 | DiaryController |
+| GET | `/api/diary/by-date` | 按日期查询日记（?date=YYYY-MM-DD） | DiaryController |
 | GET | `/api/diary/{id}` | 获取单篇日记 | DiaryController |
 | DELETE | `/api/diary/{id}` | 删除日记 | DiaryController |
+| POST | `/api/diary/{id}/analyze` | 对已有日记执行 AI 分析（结果不入库） | DiaryController |
 | GET | `/api/settings/ai` | 获取 AI 配置 | SettingsController |
 | PUT | `/api/settings/ai` | 更新 AI 配置 | SettingsController |
 | GET | `/api/settings/ollama/status` | Ollama 连接状态 | SettingsController |

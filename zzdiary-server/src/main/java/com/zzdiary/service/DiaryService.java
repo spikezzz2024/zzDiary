@@ -5,13 +5,12 @@ import com.zzdiary.model.dto.AnalyzeRequest;
 import com.zzdiary.model.dto.AnalyzeResponse;
 import com.zzdiary.model.dto.DiaryEntryDto;
 import com.zzdiary.model.entity.DiaryEntry;
-import com.zzdiary.model.entity.EmotionInsight;
 import com.zzdiary.repository.DiaryRepository;
-import com.zzdiary.repository.EmotionInsightRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,16 +18,13 @@ import java.util.List;
 public class DiaryService {
 
     private final DiaryRepository diaryRepository;
-    private final EmotionInsightRepository emotionInsightRepository;
     private final EncryptionService encryptionService;
     private final AiService aiService;
 
     public DiaryService(DiaryRepository diaryRepository,
-                        EmotionInsightRepository emotionInsightRepository,
                         EncryptionService encryptionService,
                         AiService aiService) {
         this.diaryRepository = diaryRepository;
-        this.emotionInsightRepository = emotionInsightRepository;
         this.encryptionService = encryptionService;
         this.aiService = aiService;
     }
@@ -42,30 +38,9 @@ public class DiaryService {
                 request.content().getBytes(StandardCharsets.UTF_8)
         );
 
-        String emotionTagsJson = aiResponse.emotionTags() != null
-                ? "[\"" + String.join("\",\"", aiResponse.emotionTags()) + "\"]"
-                : null;
-
         DiaryEntry entry = diaryRepository.save(new DiaryEntry(
                 null, encryptedContent, "free",
-                emotionTagsJson,
-                aiResponse.intensity(),
-                null, null, null
-        ));
-
-        byte[] encryptedRootCause = aiResponse.possibleRootCause() != null
-                ? encryptionService.encrypt(aiResponse.possibleRootCause().getBytes(StandardCharsets.UTF_8))
-                : null;
-
-        emotionInsightRepository.save(new EmotionInsight(
-                null, entry.id(),
-                aiResponse.emotionTags() != null && !aiResponse.emotionTags().isEmpty()
-                        ? aiResponse.emotionTags().getFirst() : "未知",
-                aiResponse.intensity(),
-                encryptedRootCause,
-                aiResponse.familyConnection() != null && aiResponse.familyConnection() ? 1 : 0,
-                aiResponse.mindfulnessSuggestion(),
-                null
+                null, null, null, null, null
         ));
 
         return new AnalyzeResponse(
@@ -79,6 +54,39 @@ public class DiaryService {
         );
     }
 
+    /** Save or update today's diary entry. One entry per day — re-save overwrites. */
+    @Transactional
+    public DiaryEntryDto saveToday(String content) {
+        byte[] encryptedContent = encryptionService.encrypt(
+                content.getBytes(StandardCharsets.UTF_8));
+        String today = LocalDate.now().toString();
+
+        var existing = diaryRepository.findTodayEntry(today);
+        DiaryEntry entry;
+        if (existing.isPresent()) {
+            diaryRepository.updateContent(existing.get().id(), encryptedContent);
+            entry = new DiaryEntry(
+                    existing.get().id(), encryptedContent, existing.get().mode(),
+                    existing.get().emotionTags(), existing.get().emotionIntensity(),
+                    existing.get().familyInsightId(), existing.get().createdAt(),
+                    java.time.Instant.now());
+        } else {
+            entry = diaryRepository.save(new DiaryEntry(
+                    null, encryptedContent, "free",
+                    null, null, null, null, null));
+        }
+        return toDto(entry);
+    }
+
+    /** Analyze an existing diary entry without persisting results. */
+    public AnalyzeResponse analyzeExisting(Long id) {
+        DiaryEntry entry = diaryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("日记不存在: " + id));
+        String content = new String(
+                encryptionService.decrypt(entry.content()), StandardCharsets.UTF_8);
+        return aiService.analyze(sanitize(content));
+    }
+
     public DiaryEntryDto findById(Long id) {
         DiaryEntry entry = diaryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("日记不存在: " + id));
@@ -90,6 +98,16 @@ public class DiaryService {
         return diaryRepository.findAll(size, offset).stream()
                 .map(this::toDto)
                 .toList();
+    }
+
+    public List<DiaryEntryDto> findByDate(String date) {
+        return diaryRepository.findByDate(date).stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    public List<String> getDatesWithEntries() {
+        return diaryRepository.findDistinctDates();
     }
 
     public void delete(Long id) {

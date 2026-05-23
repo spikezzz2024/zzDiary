@@ -58,6 +58,28 @@ public class DiaryRepository {
         return jdbc.update("DELETE FROM diary_entries WHERE id = ?", id);
     }
 
+    public List<DiaryEntry> findByDate(String date) {
+        var sql = "SELECT * FROM diary_entries WHERE date(created_at) = ? ORDER BY created_at DESC";
+        return jdbc.query(sql, this::mapRow, date);
+    }
+
+    public List<String> findDistinctDates() {
+        var sql = "SELECT DISTINCT date(created_at) AS entry_date FROM diary_entries ORDER BY entry_date DESC";
+        return jdbc.query(sql, (rs, _rowNum) -> rs.getString("entry_date"));
+    }
+
+    public Optional<DiaryEntry> findTodayEntry(String today) {
+        var sql = "SELECT * FROM diary_entries WHERE date(created_at) = ? LIMIT 1";
+        return jdbc.query(sql, this::mapRow, today).stream().findFirst();
+    }
+
+    public int updateContent(Long id, byte[] encryptedContent) {
+        var now = Instant.now();
+        return jdbc.update(
+                "UPDATE diary_entries SET content = ?, updated_at = ? WHERE id = ?",
+                encryptedContent, now.toString(), id);
+    }
+
     private DiaryEntry mapRow(java.sql.ResultSet rs, int rowNum) throws java.sql.SQLException {
         return new DiaryEntry(
                 rs.getLong("id"),

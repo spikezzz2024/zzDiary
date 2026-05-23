@@ -1,16 +1,24 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { useDiaryHistoryStore } from './diaryHistory.store';
-import Badge from '../../components/ui/Badge';
+import Calendar from './Calendar';
 
-import { EMOTION_COLORS, DEFAULT_EMOTION_META } from '../../lib/constants/emotions';
+function todayStr(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
-function formatDate(iso: string): string {
+function formatTime(iso: string): string {
   const d = new Date(iso);
+  return d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+}
+
+function formatDateLabel(dateStr: string): string {
+  const d = new Date(dateStr + 'T00:00:00');
   return d.toLocaleDateString('zh-CN', {
     year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
+    month: 'long',
+    day: 'numeric',
     weekday: 'short',
   });
 }
@@ -25,122 +33,181 @@ export default function DiaryHistoryPage() {
   const {
     entries,
     loading,
-    hasMore,
-    page,
     error,
-    fetchList,
+    datesWithEntries,
+    selectedDate,
+    fetchByDate,
+    fetchDates,
     deleteEntry,
+    setSelectedDate,
   } = useDiaryHistoryStore();
 
   useEffect(() => {
-    fetchList(0);
+    fetchDates();
+    const today = todayStr();
+    setSelectedDate(today);
+    fetchByDate(today);
   }, []);
+
+  const handleSelectDate = (date: string) => {
+    setSelectedDate(date);
+    fetchByDate(date);
+  };
 
   const handleDelete = async (e: React.MouseEvent, id: number) => {
     e.stopPropagation();
     if (!window.confirm('确定删除这篇日记吗？')) return;
     await deleteEntry(id);
+    if (selectedDate) {
+      fetchByDate(selectedDate);
+      fetchDates();
+    }
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-800">历史日记</h2>
+        <h2
+          className="text-lg font-medium"
+          style={{ color: 'var(--paper-text)', fontFamily: "'KaiTi', 'STKaiti', 'Noto Serif SC', serif" }}
+        >
+          日记本
+        </h2>
         <button
           onClick={() => navigate('/')}
-          className="text-sm text-indigo-600 hover:text-indigo-700 cursor-pointer"
+          className="text-sm transition-colors cursor-pointer"
+          style={{ color: 'var(--paper-accent)' }}
         >
           ← 返回书写
         </button>
       </div>
 
-      {/* Error */}
-      {error && (
-        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3">
-          <p className="text-sm text-red-600">{error}</p>
+      {/* Calendar */}
+      <Calendar
+        selectedDate={selectedDate}
+        datesWithEntries={datesWithEntries}
+        onSelectDate={handleSelectDate}
+      />
+
+      {/* Selected date header */}
+      {selectedDate && (
+        <div className="flex items-center gap-2">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            style={{ color: 'var(--paper-text-secondary)' }}>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <span className="text-sm" style={{ color: 'var(--paper-text-secondary)' }}>
+            {formatDateLabel(selectedDate)}
+          </span>
+          {!loading && (
+            <span className="text-xs" style={{ color: 'var(--paper-text-secondary)' }}>
+              · {entries.length} 篇日记
+            </span>
+          )}
         </div>
       )}
 
-      {/* Empty State */}
-      {!loading && entries.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-gray-400">
-          <svg className="w-16 h-16 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-              d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+      {/* Error */}
+      {error && (
+        <div className="rounded-lg border px-4 py-3" style={{
+          backgroundColor: '#fef2f2', borderColor: '#fecaca', color: '#991b1b',
+        }}>
+          <p className="text-sm">{error}</p>
+        </div>
+      )}
+
+      {/* Loading */}
+      {loading && (
+        <div className="flex flex-col gap-3">
+          {[1, 2].map((i) => (
+            <div
+              key={i}
+              className="rounded-xl border p-4 animate-pulse"
+              style={{ backgroundColor: 'var(--paper-bg)', borderColor: 'var(--paper-border)' }}
+            >
+              <div className="h-3 w-16 rounded mb-3" style={{ backgroundColor: 'var(--paper-border)' }} />
+              <div className="h-4 w-full rounded mb-2" style={{ backgroundColor: 'var(--paper-border)' }} />
+              <div className="h-4 w-2/3 rounded" style={{ backgroundColor: 'var(--paper-border)' }} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Empty */}
+      {!loading && entries.length === 0 && selectedDate && (
+        <div className="flex flex-col items-center justify-center py-12 gap-2">
+          <svg className="w-10 h-10 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            style={{ color: 'var(--paper-border)' }}>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1}
+              d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
           </svg>
-          <p className="text-sm">还没有写过日记</p>
+          <p className="text-sm" style={{ color: 'var(--paper-text-secondary)' }}>
+            这一天没有日记
+          </p>
           <button
             onClick={() => navigate('/')}
-            className="mt-3 text-sm text-indigo-600 hover:text-indigo-700 cursor-pointer"
+            className="text-sm mt-1 transition-colors cursor-pointer"
+            style={{ color: 'var(--paper-accent)' }}
           >
-            去写第一篇 →
+            去写一篇 →
           </button>
         </div>
       )}
 
-      {/* Entry List */}
-      <div className="flex flex-col gap-3">
-        {entries.map((entry) => {
-          const intensityPercent = (entry.emotionIntensity ?? 5) * 10;
-
-          return (
+      {/* Entry cards */}
+      {!loading && entries.length > 0 && (
+        <div className="flex flex-col gap-3">
+          {entries.map((entry) => (
             <div
               key={entry.id}
               onClick={() => navigate(`/diary/${entry.id}`)}
-              className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md hover:border-gray-300 transition-all cursor-pointer"
+              className="rounded-xl border p-4 transition-all cursor-pointer group"
+              style={{
+                backgroundColor: 'var(--paper-bg)',
+                borderColor: 'var(--paper-border)',
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.borderColor = 'var(--paper-accent)';
+                (e.currentTarget as HTMLElement).style.boxShadow = '0 2px 8px rgba(0,0,0,0.06)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.borderColor = 'var(--paper-border)';
+                (e.currentTarget as HTMLElement).style.boxShadow = '';
+              }}
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
-                  {/* Date & Mode */}
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs text-gray-400">
-                      {formatDate(entry.createdAt)}
-                    </span>
-                    <span className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-500">
-                      {entry.mode === 'guided' ? 'AI 引导' : '自由书写'}
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                      style={{ color: 'var(--paper-text-secondary)' }}>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                        d="M12 6v6h4.5m6 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-xs" style={{ color: 'var(--paper-text-secondary)' }}>
+                      {formatTime(entry.createdAt)}
                     </span>
                   </div>
-
-                  {/* Content Preview */}
-                  <p className="text-sm text-gray-600 leading-relaxed mb-3">
-                    {truncate(entry.content, 120)}
+                  <p
+                    className="text-sm leading-relaxed"
+                    style={{ color: 'var(--paper-text)', fontFamily: "'KaiTi', 'STKaiti', 'Noto Serif SC', serif" }}
+                  >
+                    {truncate(entry.content, 150)}
                   </p>
-
-                  {/* Emotion Tags & Intensity */}
-                  <div className="flex items-center gap-3 flex-wrap">
-                    {entry.emotionTags && entry.emotionTags.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {entry.emotionTags.map((tag) => {
-                          const tagMeta = EMOTION_COLORS[tag] ?? DEFAULT_EMOTION_META;
-                          return (
-                            <Badge key={tag} label={tagMeta.label} color={tagMeta.color} bg={tagMeta.bg} />
-                          );
-                        })}
-                      </div>
-                    )}
-                    {entry.emotionIntensity != null && (
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-12 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                          <div
-                            className="h-full rounded-full"
-                            style={{
-                              width: `${intensityPercent}%`,
-                              backgroundColor:
-                                entry.emotionIntensity >= 7 ? '#ef4444' :
-                                entry.emotionIntensity >= 4 ? '#f59e0b' : '#22c55e',
-                            }}
-                          />
-                        </div>
-                        <span className="text-xs text-gray-400">{entry.emotionIntensity}/10</span>
-                      </div>
-                    )}
-                  </div>
                 </div>
 
-                {/* Delete */}
                 <button
                   onClick={(e) => handleDelete(e, entry.id)}
-                  className="ml-3 p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer shrink-0"
+                  className="ml-3 p-1.5 rounded-lg transition-all cursor-pointer shrink-0 opacity-0 group-hover:opacity-100"
+                  style={{ color: 'var(--paper-text-secondary)' }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.backgroundColor = '#fef2f2';
+                    (e.currentTarget as HTMLElement).style.color = '#ef4444';
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.backgroundColor = '';
+                    (e.currentTarget as HTMLElement).style.color = 'var(--paper-text-secondary)';
+                  }}
                   title="删除"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -148,34 +215,6 @@ export default function DiaryHistoryPage() {
                       d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
                 </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Load More */}
-      {hasMore && entries.length > 0 && (
-        <button
-          onClick={() => fetchList(page + 1)}
-          disabled={loading}
-          className="w-full py-2.5 text-sm text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? '加载中...' : '加载更多'}
-        </button>
-      )}
-
-      {/* Loading Skeleton (initial) */}
-      {loading && entries.length === 0 && (
-        <div className="flex flex-col gap-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="rounded-xl border border-gray-200 bg-white p-5 animate-pulse">
-              <div className="h-3 w-24 bg-gray-200 rounded mb-3" />
-              <div className="h-4 w-full bg-gray-200 rounded mb-2" />
-              <div className="h-4 w-2/3 bg-gray-200 rounded mb-3" />
-              <div className="flex gap-2">
-                <div className="h-4 w-12 bg-gray-200 rounded-full" />
-                <div className="h-4 w-12 bg-gray-200 rounded-full" />
               </div>
             </div>
           ))}

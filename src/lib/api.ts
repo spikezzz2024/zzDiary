@@ -38,9 +38,13 @@ function del<T>(url: string): Promise<T> {
 // Diary
 export const diaryApi = {
   analyze: (data: AnalyzeRequest) => post<AnalyzeResponse>('/diary/analyze', data),
+  analyzeEntry: (id: number) => post<AnalyzeResponse>(`/diary/${id}/analyze`, {}),
+  saveToday: (content: string) => post<DiaryEntryDto>('/diary/save', { content }),
   list: (page = 0, size = 20) =>
     get<DiaryEntryDto[]>(`/diary/list?page=${page}&size=${size}`),
   getById: (id: number) => get<DiaryEntryDto>(`/diary/${id}`),
+  getByDate: (date: string) => get<DiaryEntryDto[]>(`/diary/by-date?date=${date}`),
+  getDates: () => get<string[]>('/diary/dates'),
   delete: (id: number) => del<{ deleted: boolean }>(`/diary/${id}`),
 };
 
