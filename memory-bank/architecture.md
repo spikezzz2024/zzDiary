@@ -39,7 +39,7 @@
 src/
 ├── features/          # 业务模块（按业务拆分）
 │   ├── diary/         # ✅ 日记书写（DiaryPage, Editor, GuidedChat, store, types）
-│   ├── emotion/       # ✅ 情绪分析结果展示（EmotionResult, store, types）
+│   ├── emotion/       # ✅ 情绪分析（Dashboard 趋势图/分布饼图, store, types, 后端 API）
 │   ├── family/        # ⬜ 原生家庭（BackgroundForm, InsightPanel, store, types）
 │   ├── mindfulness/   # ⬜ 正念练习（ExercisePlayer, GratitudeTemplate, store, types）
 │   └── settings/      # ✅ 应用设置（AiSettingsPage, settings.store）
@@ -88,10 +88,18 @@ zzdiary-server/src/main/java/com/zzdiary/
   → lib/api.ts (POST /api/diary/analyze)
   → DiaryController (参数校验)
   → DiaryService (编排)
-    → SanitizationService (PII 脱敏) → AiService (情绪分析)
+    → SanitizationService (PII 脱敏) → AiService (情绪分析，必须 AI 可用)
     → EncryptionService (加密日记原文) → DiaryRepository (SQLite 存储)
-  ← AnalyzeResponse (JSON, 分析结果不入库)
+    → 分析结果持久化到 emotion_insights 表（每情绪标签一行）
+  ← AnalyzeResponse (JSON)
   ← React 渲染分析结果（侧边栏，会话内有效）
+
+情绪趋势/分布查询
+  → GET /api/emotion/trend?from=&to=
+  → EmotionAnalysisService
+    → 读取 emotion_insights（仅 AI 分析过的条目有数据）
+  ← TrendPoint[] / EmotionDistribution[]
+  ← EmotionDashboard 页面展示 Recharts 图表
 ```
 
 ## 外部通信
