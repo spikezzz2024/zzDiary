@@ -21,9 +21,24 @@ export interface DiaryEntryDto {
   createdAt: string;
 }
 
+export interface EmotionDistribution {
+  emotion: string;
+  count: number;
+}
+
 export interface AiSettings {
   mode: 'ollama' | 'deepseek';
   deepseekApiKey: string | null;
   ollamaModel: string;
   ollamaBaseUrl: string;
+}
+
+export interface FamilyBackground {
+  id: number;
+  childhoodSummary: string;
+  parentalRelationship: string;
+  significantEvents: string;
+  skillSummary: string | null;
+  createdAt: string;
+  updatedAt: string;
 }

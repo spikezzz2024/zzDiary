@@ -68,6 +68,17 @@ public class DiaryRepository {
         return jdbc.query(sql, (rs, _rowNum) -> rs.getString("entry_date"));
     }
 
+    public List<DiaryEntry> findByDateRange(String from, String to) {
+        var sql = "SELECT * FROM diary_entries WHERE date(created_at) >= ? AND date(created_at) <= ? ORDER BY created_at ASC";
+        return jdbc.query(sql, this::mapRow, from, to);
+    }
+
+    /** Get all entries ordered by date, for aggregation queries. */
+    public List<DiaryEntry> findAllEntries() {
+        var sql = "SELECT * FROM diary_entries ORDER BY created_at ASC";
+        return jdbc.query(sql, this::mapRow);
+    }
+
     public Optional<DiaryEntry> findTodayEntry(String today) {
         var sql = "SELECT * FROM diary_entries WHERE date(created_at) = ? LIMIT 1";
         return jdbc.query(sql, this::mapRow, today).stream().findFirst();
@@ -78,6 +89,22 @@ public class DiaryRepository {
         return jdbc.update(
                 "UPDATE diary_entries SET content = ?, updated_at = ? WHERE id = ?",
                 encryptedContent, now.toString(), id);
+    }
+
+    /** Persist AI analysis result metadata on the diary entry. */
+    public int updateEmotion(Long id, String emotionTags, int intensity) {
+        var now = Instant.now();
+        return jdbc.update(
+                "UPDATE diary_entries SET emotion_tags = ?, emotion_intensity = ?, updated_at = ? WHERE id = ?",
+                emotionTags, intensity, now.toString(), id);
+    }
+
+    /** Link a diary entry to the family background record. */
+    public int updateFamilyInsightId(Long id, Long familyInsightId) {
+        var now = Instant.now();
+        return jdbc.update(
+                "UPDATE diary_entries SET family_insight_id = ?, updated_at = ? WHERE id = ?",
+                familyInsightId, now.toString(), id);
     }
 
     private DiaryEntry mapRow(java.sql.ResultSet rs, int rowNum) throws java.sql.SQLException {

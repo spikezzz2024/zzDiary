@@ -3,7 +3,10 @@ import type {
   AnalyzeResponse,
   AiSettings,
   DiaryEntryDto,
+  EmotionDistribution,
+  FamilyBackground,
 } from '../types/shared';
+import type { TrendPoint } from '../features/emotion/types';
 
 const BASE = '/api';
 
@@ -54,4 +57,23 @@ export const settingsApi = {
   updateAi: (updates: Partial<AiSettings>) => put<AiSettings>('/settings/ai', updates),
   ollamaStatus: () =>
     get<{ available: boolean; baseUrl: string; model: string }>('/settings/ollama/status'),
+};
+
+// Emotion
+export const emotionApi = {
+  getTrend: (from: string, to: string) =>
+    get<TrendPoint[]>(`/emotion/trend?from=${from}&to=${to}`),
+  getDistribution: () => get<EmotionDistribution[]>('/emotion/distribution'),
+  getByEntry: (entryId: number) => get<AnalyzeResponse>(`/emotion/${entryId}`),
+};
+
+// Family
+export const familyApi = {
+  getBackground: () => get<FamilyBackground | null>('/family/background'),
+  saveBackground: (data: {
+    childhoodSummary: string;
+    parentalRelationship: string;
+    significantEvents: string;
+  }) => put<FamilyBackground>('/family/background', data),
+  distill: () => post<{ skillSummary: string }>('/family/distill', {}),
 };

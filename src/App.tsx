@@ -3,6 +3,8 @@ import AiSettingsPage from './features/settings/AiSettingsPage';
 import DiaryPage from './features/diary/DiaryPage';
 import DiaryHistoryPage from './features/diary/DiaryHistoryPage';
 import DiaryDetailPage from './features/diary/DiaryDetailPage';
+import EmotionDashboard from './features/emotion/EmotionDashboard';
+import FamilyPage from './features/family/FamilyPage';
 
 const NAV_LINK = 'text-sm transition-colors cursor-pointer';
 const NAV_ACTIVE = 'font-medium';
@@ -34,6 +36,12 @@ function MainLayout() {
             <Link to="/history" className={linkClass('/history')} style={{ color: '#5c4a2e' }}>
               日记本
             </Link>
+            <Link to="/family" className={linkClass('/family')} style={{ color: '#5c4a2e' }}>
+              家庭
+            </Link>
+            <Link to="/emotion" className={linkClass('/emotion')} style={{ color: '#5c4a2e' }}>
+              情绪
+            </Link>
             <Link to="/settings" className={linkClass('/settings')} style={{ color: '#5c4a2e' }}>
               设置
             </Link>
@@ -47,6 +55,8 @@ function MainLayout() {
           <Route path="/" element={<DiaryPage />} />
           <Route path="/history" element={<DiaryHistoryPage />} />
           <Route path="/diary/:id" element={<DiaryDetailPage />} />
+          <Route path="/family" element={<FamilyPage />} />
+          <Route path="/emotion" element={<EmotionDashboard />} />
           <Route path="/settings" element={<AiSettingsPage />} />
         </Routes>
       </main>

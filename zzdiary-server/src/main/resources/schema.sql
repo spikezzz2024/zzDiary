@@ -1,3 +1,13 @@
+CREATE TABLE IF NOT EXISTS family_background (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    childhood_summary BLOB NOT NULL,
+    parental_relationship TEXT NOT NULL,
+    significant_events BLOB NOT NULL,
+    skill_summary BLOB,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS diary_entries (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     content BLOB NOT NULL,

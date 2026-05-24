@@ -5,11 +5,14 @@ import com.zzdiary.model.dto.AnalyzeRequest;
 import com.zzdiary.model.dto.AnalyzeResponse;
 import com.zzdiary.model.dto.DiaryEntryDto;
 import com.zzdiary.model.entity.DiaryEntry;
+import com.zzdiary.model.entity.EmotionInsight;
 import com.zzdiary.repository.DiaryRepository;
+import com.zzdiary.repository.EmotionInsightRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -18,30 +21,41 @@ import java.util.List;
 public class DiaryService {
 
     private final DiaryRepository diaryRepository;
+    private final EmotionInsightRepository emotionInsightRepository;
     private final EncryptionService encryptionService;
     private final AiService aiService;
+    private final FamilyService familyService;
 
     public DiaryService(DiaryRepository diaryRepository,
+                        EmotionInsightRepository emotionInsightRepository,
                         EncryptionService encryptionService,
-                        AiService aiService) {
+                        AiService aiService,
+                        FamilyService familyService) {
         this.diaryRepository = diaryRepository;
+        this.emotionInsightRepository = emotionInsightRepository;
         this.encryptionService = encryptionService;
         this.aiService = aiService;
+        this.familyService = familyService;
     }
 
     @Transactional
     public AnalyzeResponse analyze(AnalyzeRequest request) {
         String sanitized = sanitize(request.content());
-        AnalyzeResponse aiResponse = aiService.analyze(sanitized);
+        String familySkill = familyService.getSkillForAnalysis();
+        AnalyzeResponse aiResponse = aiService.analyze(sanitized, familySkill);
 
         byte[] encryptedContent = encryptionService.encrypt(
                 request.content().getBytes(StandardCharsets.UTF_8)
         );
 
+        Long familyInsightId = familyService.getFamilyBackgroundId();
+
         DiaryEntry entry = diaryRepository.save(new DiaryEntry(
                 null, encryptedContent, "free",
-                null, null, null, null, null
+                null, null, familyInsightId, null, null
         ));
+
+        persistEmotion(entry.id(), aiResponse);
 
         return new AnalyzeResponse(
                 entry.id(),
@@ -69,7 +83,7 @@ public class DiaryService {
                     existing.get().id(), encryptedContent, existing.get().mode(),
                     existing.get().emotionTags(), existing.get().emotionIntensity(),
                     existing.get().familyInsightId(), existing.get().createdAt(),
-                    java.time.Instant.now());
+                    Instant.now());
         } else {
             entry = diaryRepository.save(new DiaryEntry(
                     null, encryptedContent, "free",
@@ -78,13 +92,32 @@ public class DiaryService {
         return toDto(entry);
     }
 
-    /** Analyze an existing diary entry without persisting results. */
+    /** Analyze an existing diary entry and persist the results. */
+    @Transactional
     public AnalyzeResponse analyzeExisting(Long id) {
         DiaryEntry entry = diaryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("日记不存在: " + id));
         String content = new String(
                 encryptionService.decrypt(entry.content()), StandardCharsets.UTF_8);
-        return aiService.analyze(sanitize(content));
+        String familySkill = familyService.getSkillForAnalysis();
+        AnalyzeResponse aiResponse = aiService.analyze(sanitize(content), familySkill);
+
+        persistEmotion(id, aiResponse);
+
+        Long familyInsightId = familyService.getFamilyBackgroundId();
+        if (familyInsightId != null) {
+            diaryRepository.updateFamilyInsightId(id, familyInsightId);
+        }
+
+        return new AnalyzeResponse(
+                id,
+                aiResponse.emotionTags(),
+                aiResponse.intensity(),
+                aiResponse.cognitiveBiases(),
+                aiResponse.possibleRootCause(),
+                aiResponse.familyConnection(),
+                aiResponse.mindfulnessSuggestion()
+        );
     }
 
     public DiaryEntryDto findById(Long id) {
@@ -114,6 +147,29 @@ public class DiaryService {
         int deleted = diaryRepository.deleteById(id);
         if (deleted == 0) {
             throw new RuntimeException("日记不存在: " + id);
+        }
+    }
+
+    private void persistEmotion(Long entryId, AnalyzeResponse aiResponse) {
+        String tagsJson = "[\"" + String.join("\",\"", aiResponse.emotionTags()) + "\"]";
+        diaryRepository.updateEmotion(entryId, tagsJson, aiResponse.intensity());
+
+        emotionInsightRepository.deleteByEntryId(entryId);
+
+        byte[] encryptedRootCause = encryptionService.encrypt(
+                aiResponse.possibleRootCause().getBytes(StandardCharsets.UTF_8));
+
+        for (String emotionType : aiResponse.emotionTags()) {
+            emotionInsightRepository.save(new EmotionInsight(
+                    null,
+                    entryId,
+                    emotionType,
+                    aiResponse.intensity(),
+                    encryptedRootCause,
+                    aiResponse.familyConnection() ? 1 : 0,
+                    aiResponse.mindfulnessSuggestion(),
+                    Instant.now()
+            ));
         }
     }
 

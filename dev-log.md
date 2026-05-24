@@ -1,5 +1,103 @@
 # zzDiary 开发日志
 
+## 2026-05-24 — 原生家庭背景功能
+
+### 新增文件 (9)
+
+| 文件 | 说明 |
+|------|------|
+| `zzdiary-server/.../model/entity/FamilyBackground.java` | 家庭背景实体 record（含 skill_summary BLOB） |
+| `zzdiary-server/.../model/dto/FamilyBackgroundRequest.java` | 保存背景请求 DTO，childhoodSummary / significantEvents @NotBlank |
+| `zzdiary-server/.../model/dto/FamilyBackgroundResponse.java` | 解密后的背景响应 DTO，含 skillSummary |
+| `zzdiary-server/.../repository/FamilyBackgroundRepository.java` | 单行表 upsert + updateSkillSummary 部分更新 |
+| `zzdiary-server/.../service/FamilyService.java` | 背景 CRUD + AI 提炼 + 分析用技能获取 |
+| `zzdiary-server/.../controller/FamilyController.java` | `GET/PUT /api/family/background` + `POST /api/family/distill` |
+| `src/features/family/family.store.ts` | Zustand store：loading/saving/distilling/error 状态管理 |
+| `src/features/family/FamilyPage.tsx` | 家庭背景页面：骨架屏/空引导/表单+提炼/技能卡片 全状态覆盖 |
+
+### 修改文件 (6)
+
+| 文件 | 变更 |
+|------|------|
+| `schema.sql` | `diary_entries` 之前新增 `family_background` 建表语句（childhood_summary BLOB / parental_relationship TEXT / significant_events BLOB / skill_summary BLOB） |
+| `AiService.java` | 提取 `callAi()` 私有方法封装 DeepSeek/Ollama 切换；新增 `analyze(content, familySkill)` 重载方法（技能非空时追加到 system prompt）；新增 `distillFamilySkill()` 返回纯文本 |
+| `DiaryService.java` | 注入 `FamilyService`；`analyze()` / `analyzeExisting()` 调用 `getSkillForAnalysis()` 获取技能注入 AI；保存日记时设置 `familyInsightId` |
+| `DiaryRepository.java` | 新增 `updateFamilyInsightId()` 方法 |
+| `src/types/shared.ts` | 新增 `FamilyBackground` 接口 |
+| `src/lib/api.ts` | 新增 `familyApi`（getBackground / saveBackground / distill） |
+| `src/App.tsx` | `/family` 路由 + 导航栏"家庭"入口（日记本与情绪之间） |
+
+### 设计决策
+
+- 家庭背景表单填写 → AI 提炼为约 200 字"技能摘要" → 摘要注入到每次日记分析 prompt 中（无条件，有则注入）
+- `family_background` 采用单行表模式（upsert via DELETE + INSERT），与 `ai_settings` 一致
+- `parentalRelationship` 存明文（短标签低敏感），其余字段 AES-256-GCM 加密
+- 重载 `AiService.analyze()` 而非改签名，保持现有调用方向后兼容
+- 分析日记时自动设置 `diary_entries.family_insight_id`，为将来"查询家庭相关日记"留基础
+
+---
+
+## 2026-05-23 (深夜) — 情绪可视化前端 + 移除本地规则引擎
+
+### 删除本地规则引擎
+
+- `AiService.java`：移除 `analyzeLocal()`、`fallbackAnalyze()` 及所有关键词检测方法（`detectEmotions` / `estimateIntensity` / `detectBiases` / `hasFamilyKeywords`）。AI 不可用时直接抛出异常，不再降级到本地猜测。
+- `DiaryService.java`：`analyze()` / `analyzeExisting()` 现在将 AI 分析结果持久化到 `emotion_insights` 表（每情绪标签一行），同时更新 `diary_entries.emotion_tags` 和 `emotion_intensity`。
+- `EmotionAnalysisService.java`：重写为从 `emotion_insights` 表读取已持久化的 AI 结果进行聚合，不再调用本地分析。
+- `EmotionInsightRepository.java`：新增 `findAllByEntryIds()` / `deleteByEntryId()`，支持批量查询和覆盖更新。
+
+### 新增文件 (1)
+
+| 文件 | 说明 |
+|------|------|
+| `src/features/emotion/EmotionDashboard.tsx` | 情绪仪表盘：日期范围选择 + Recharts 趋势折线图（日期/主导情绪/强度） + 环形分布饼图（情绪类型/出现次数） + 骨架屏/空引导/错误重试全状态覆盖 |
+
+### 修改文件 (6)
+
+| 文件 | 变更 |
+|------|------|
+| `src/App.tsx` | 新增 `/emotion` 路由 + 导航栏"情绪"入口 |
+| `src/lib/api.ts` | 新增 `emotionApi`（getTrend / getDistribution / getByEntry） |
+| `src/types/shared.ts` | 新增 `EmotionDistribution` 类型 |
+| `memory-bank/architecture.md` | 更新情绪模块状态 + 数据流描述（分析持久化 → 趋势聚合链） |
+| `memory-bank/api-endpoints.md` | 更新分析端点说明 + emotion 端点补充详细文档 |
+
+### 设计决策
+
+- 情绪趋势/分布**仅反映 AI 分析过的日记**，未分析的日记不出现在统计中
+- 空数据时展示引导文案，指向书写页执行 AI 分析
+- 趋势图需要至少 2 天数据才渲染折线，避免单点无意义图表
+- 饼图颜色优先使用情绪常量映射色，回退到预设调色板
+
+---
+
+## 2026-05-23 (晚间) — 情绪趋势后端 API
+
+### 新增文件 (4)
+
+| 文件 | 说明 |
+|------|------|
+| `zzdiary-server/.../controller/EmotionController.java` | 情绪 REST 接口：趋势、分布、单条查询 |
+| `zzdiary-server/.../service/EmotionAnalysisService.java` | 情绪趋势分析业务逻辑：按日期聚合、情绪分布统计、单条目分析 |
+| `zzdiary-server/.../model/dto/TrendPoint.java` | 趋势数据点 DTO（日期、主导情绪、平均强度） |
+| `zzdiary-server/.../model/dto/EmotionDistribution.java` | 情绪分布 DTO（情绪类型、出现次数） |
+
+### 修改文件 (2)
+
+| 文件 | 变更 |
+|------|------|
+| `zzdiary-server/.../repository/DiaryRepository.java` | 新增 `findByDateRange()` 方法，支持日期范围查询 |
+| `zzdiary-server/.../service/AiService.java` | 提取 `analyzeLocal()` 公开方法：纯规则引擎分析，不调用 AI，供趋势聚合批量使用；`fallbackAnalyze` 改为调用 `analyzeLocal` 后追加降级说明 |
+
+### 设计决策
+
+- 趋势/分布分析全部使用本地规则引擎（`analyzeLocal`），不调用 AI，确保批量查询性能
+- 分析结果不入库，每次请求实时计算，保证与最新日记内容一致
+- 日期聚合按 `created_at` 自然日分组，同一天多篇日记取情绪标签众数 + 强度均值
+- `GET /api/emotion/{entryId}` 复用 `analyzeLocal`，返回与 `/api/diary/{id}/analyze` 相同结构（但不调用 AI）
+
+---
+
 ## 2026-05-23 (下午 2) — 日记自动保存草稿
 
 ### 新增文件 (1)
