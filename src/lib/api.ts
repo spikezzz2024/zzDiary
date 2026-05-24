@@ -5,6 +5,7 @@ import type {
   DiaryEntryDto,
   EmotionDistribution,
   FamilyBackground,
+  SearchResult,
 } from '../types/shared';
 import type { TrendPoint } from '../features/emotion/types';
 import type {
@@ -81,6 +82,20 @@ export const familyApi = {
     significantEvents: string;
   }) => put<FamilyBackground>('/family/background', data),
   distill: () => post<{ skillSummary: string }>('/family/distill', {}),
+};
+
+// Search
+export const searchApi = {
+  semantic: (query: string) => post<SearchResult[]>('/search/semantic', { query }),
+  modelStatus: () =>
+    get<{
+      modelName: string;
+      modelSizeMB: number;
+      ollamaAvailable: boolean;
+      modelPulled: boolean;
+      indexedCount: number;
+    }>('/search/model-status'),
+  pullModel: () => post<{ status: string; message?: string }>('/search/pull-model', {}),
 };
 
 // Mindfulness

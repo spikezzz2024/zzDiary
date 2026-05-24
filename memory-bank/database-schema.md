@@ -15,6 +15,7 @@
 | family_background | 原生家庭背景 | childhood_summary, significant_events |
 | cognitive_biases | 认知偏差记录 | 无 |
 | mindfulness_exercises | 正念练习记录 | 无 |
+| diary_embeddings | 日记嵌入向量 | 无（向量 BLOB，非原文） |
 
 ---
 
@@ -58,6 +59,19 @@
 | significant_events | BLOB | | 加密的重大事件 JSON |
 | created_at | TEXT | NOT NULL | ISO 8601 时间戳 |
 | updated_at | TEXT | NOT NULL | ISO 8601 时间戳 |
+
+---
+
+## diary_embeddings
+
+| 字段 | 类型 | 约束 | 说明 |
+|------|------|------|------|
+| id | INTEGER | PK AUTOINCREMENT | 主键 |
+| entry_id | INTEGER | FK NOT NULL UNIQUE | 关联 diary_entries，一对一 |
+| embedding | BLOB | NOT NULL | 嵌入向量（float32 数组，每元素 4 字节） |
+| model | TEXT | NOT NULL | 嵌入模型名（如 nomic-embed-text） |
+| dimension | INTEGER | NOT NULL | 向量维度（如 768） |
+| created_at | TEXT | NOT NULL | ISO 8601 时间戳 |
 
 ---
 

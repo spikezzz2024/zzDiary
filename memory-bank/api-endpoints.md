@@ -29,7 +29,9 @@
 | POST | `/api/mindfulness/recommend` | ✅ 生成正念推荐 | MindfulnessController |
 | POST | `/api/mindfulness/log` | ✅ 记录正念练习完成 | MindfulnessController |
 | GET | `/api/mindfulness/progress` | ✅ 获取正念进度统计 | MindfulnessController |
-| POST | `/api/search/semantic` | 语义搜索历史日记 | SearchController |
+| POST | `/api/search/semantic` | ✅ 语义搜索历史日记（Ollama 嵌入 + 余弦相似度） | SearchController |
+| GET | `/api/search/model-status` | ✅ 检查嵌入模型下载状态 | SearchController |
+| POST | `/api/search/pull-model` | ✅ 拉取嵌入模型（nomic-embed-text, ~274MB） | SearchController |
 | GET | `/actuator/health` | 健康检查 | Actuator |
 
 ---
@@ -77,9 +79,45 @@ Response: { "entryId": 1, "emotionTags": ["焦虑"], "intensity": 6, ... }
 
 ### POST /api/search/semantic
 
+> 使用 Ollama 嵌入模型 (nomic-embed-text) 将查询文本转为向量，与日记索引进行余弦相似度匹配，返回 Top-20 结果。
+
 ```
 Request:  { "query": "和妈妈吵架的那次" }
-Response: [{ "id": 1, "content": "...", "emotionTags": [...], "score": 0.92 }]
+Response: [
+  {
+    "id": 1,
+    "snippet": "今天和妈妈因为工作的事情...",
+    "score": 0.92,
+    "emotionTags": ["愤怒", "内疚"],
+    "createdAt": "2026-05-24T10:30:00Z"
+  }
+]
+```
+
+**前置条件：** 首次使用时会引导下载嵌入模型（nomic-embed-text, ~274MB），仅需下载一次。
+
+**索引时机：** 日记保存时自动生成嵌入并加入索引；应用启动时从 `diary_embeddings` 表加载全部向量到内存。
+
+### GET /api/search/model-status
+
+> 检查嵌入模型是否可用，以及索引状态。
+
+```
+Response: {
+  "modelName": "nomic-embed-text",
+  "modelSizeMB": 274,
+  "ollamaAvailable": true,
+  "modelPulled": true,
+  "indexedCount": 42
+}
+```
+
+### POST /api/search/pull-model
+
+> 从 Ollama 拉取嵌入模型（阻塞调用，可能耗时数分钟）。
+
+```
+Response: { "status": "ok" }  // 或 { "status": "error", "message": "..." }
 ```
 
 ### POST /api/mindfulness/recommend

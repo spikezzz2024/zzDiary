@@ -25,17 +25,23 @@ public class DiaryService {
     private final EncryptionService encryptionService;
     private final AiService aiService;
     private final FamilyService familyService;
+    private final EmbeddingService embeddingService;
+    private final VectorIndexManager vectorIndex;
 
     public DiaryService(DiaryRepository diaryRepository,
                         EmotionInsightRepository emotionInsightRepository,
                         EncryptionService encryptionService,
                         AiService aiService,
-                        FamilyService familyService) {
+                        FamilyService familyService,
+                        EmbeddingService embeddingService,
+                        VectorIndexManager vectorIndex) {
         this.diaryRepository = diaryRepository;
         this.emotionInsightRepository = emotionInsightRepository;
         this.encryptionService = encryptionService;
         this.aiService = aiService;
         this.familyService = familyService;
+        this.embeddingService = embeddingService;
+        this.vectorIndex = vectorIndex;
     }
 
     @Transactional
@@ -57,6 +63,8 @@ public class DiaryService {
 
         persistEmotion(entry.id(), aiResponse);
 
+        indexEntry(entry.id(), request.content());
+
         return new AnalyzeResponse(
                 entry.id(),
                 aiResponse.emotionTags(),
@@ -68,7 +76,7 @@ public class DiaryService {
         );
     }
 
-    /** Save or update today's diary entry. One entry per day — re-save overwrites. */
+    /** Save or update today's diary entry and update its semantic embedding. */
     @Transactional
     public DiaryEntryDto saveToday(String content) {
         byte[] encryptedContent = encryptionService.encrypt(
@@ -89,6 +97,7 @@ public class DiaryService {
                     null, encryptedContent, "free",
                     null, null, null, null, null));
         }
+        indexEntry(entry.id(), content);
         return toDto(entry);
     }
 
@@ -108,6 +117,8 @@ public class DiaryService {
         if (familyInsightId != null) {
             diaryRepository.updateFamilyInsightId(id, familyInsightId);
         }
+
+        indexEntry(id, content);
 
         return new AnalyzeResponse(
                 id,
@@ -147,6 +158,22 @@ public class DiaryService {
         int deleted = diaryRepository.deleteById(id);
         if (deleted == 0) {
             throw new RuntimeException("日记不存在: " + id);
+        }
+        try {
+            embeddingService.deleteByEntryId(id);
+            vectorIndex.remove(id);
+        } catch (Exception ignored) {
+            // Embedding cleanup is best-effort
+        }
+    }
+
+    /** Generate embedding for content and add to both DB and in-memory index. */
+    private void indexEntry(Long entryId, String plainContent) {
+        try {
+            float[] vector = embeddingService.embedAndPersist(entryId, plainContent);
+            vectorIndex.add(entryId, vector);
+        } catch (Exception e) {
+            // Embedding failure should not block diary save
         }
     }
 

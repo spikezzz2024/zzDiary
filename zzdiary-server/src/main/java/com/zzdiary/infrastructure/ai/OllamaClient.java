@@ -62,6 +62,51 @@ public class OllamaClient {
         return response.message().getOrDefault("content", "");
     }
 
+    /** Generate embedding vector for the given text using the specified model. */
+    @SuppressWarnings("unchecked")
+    public float[] embed(String model, String text) {
+        var response = restClient.post()
+                .uri("/api/embeddings")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Map.of("model", model, "prompt", text))
+                .retrieve()
+                .body(Map.class);
+
+        if (response == null || !response.containsKey("embedding")) {
+            throw new RuntimeException("Ollama 嵌入返回空响应，请确认已拉取嵌入模型: ollama pull " + model);
+        }
+
+        var embeddingList = (List<Number>) response.get("embedding");
+        float[] floats = new float[embeddingList.size()];
+        for (int i = 0; i < embeddingList.size(); i++) {
+            floats[i] = embeddingList.get(i).floatValue();
+        }
+        return floats;
+    }
+
+    /** Get list of pulled model names from Ollama. */
+    @SuppressWarnings("unchecked")
+    public List<String> listModelNames() {
+        var response = restClient.get()
+                .uri("/api/tags")
+                .retrieve()
+                .body(Map.class);
+
+        if (response == null || !response.containsKey("models")) {
+            return List.of();
+        }
+        var models = (List<Map<String, Object>>) response.get("models");
+        return models.stream()
+                .map(m -> (String) m.get("name"))
+                .toList();
+    }
+
+    /** Check if a specific model (or partial name match) is available locally. */
+    public boolean isModelPulled(String modelName) {
+        return listModelNames().stream()
+                .anyMatch(name -> name.startsWith(modelName));
+    }
+
     /** Check if Ollama is reachable. */
     public boolean isAvailable() {
         try {

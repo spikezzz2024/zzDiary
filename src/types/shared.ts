@@ -33,6 +33,14 @@ export interface AiSettings {
   ollamaBaseUrl: string;
 }
 
+export interface SearchResult {
+  id: number;
+  snippet: string;
+  score: number;
+  emotionTags: string[];
+  createdAt: string;
+}
+
 export interface FamilyBackground {
   id: number;
   childhoodSummary: string;

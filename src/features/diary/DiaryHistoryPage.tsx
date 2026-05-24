@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { useDiaryHistoryStore } from './diaryHistory.store';
+import { useSearchStore } from './search.store';
 import Calendar from './Calendar';
+import SearchBar from './SearchBar';
 
 function todayStr(): string {
   const d = new Date();
@@ -41,6 +43,7 @@ export default function DiaryHistoryPage() {
     deleteEntry,
     setSelectedDate,
   } = useDiaryHistoryStore();
+  const searchQuery = useSearchStore((s) => s.query);
 
   useEffect(() => {
     fetchDates();
@@ -82,15 +85,21 @@ export default function DiaryHistoryPage() {
         </button>
       </div>
 
-      {/* Calendar */}
-      <Calendar
-        selectedDate={selectedDate}
-        datesWithEntries={datesWithEntries}
-        onSelectDate={handleSelectDate}
-      />
+      {/* Search bar */}
+      <SearchBar />
 
-      {/* Selected date header */}
-      {selectedDate && (
+      {/* When searching, hide calendar and entries — SearchBar shows its own results */}
+      {searchQuery.trim() ? null : (
+        <>
+          {/* Calendar */}
+          <Calendar
+            selectedDate={selectedDate}
+            datesWithEntries={datesWithEntries}
+            onSelectDate={handleSelectDate}
+          />
+
+          {/* Selected date header */}
+          {selectedDate && (
         <div className="flex items-center gap-2">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
             style={{ color: 'var(--paper-text-secondary)' }}>
@@ -219,6 +228,8 @@ export default function DiaryHistoryPage() {
             </div>
           ))}
         </div>
+      )}
+        </>
       )}
     </div>
   );

@@ -29,7 +29,7 @@
          │
          ▼
 ┌─────────────────────────────────────────┐
-│   SQLite (JDBC) + JVector (向量检索)     │
+│   SQLite (JDBC) + 内存向量索引          │
 └─────────────────────────────────────────┘
 ```
 
@@ -38,9 +38,9 @@
 ```
 src/
 ├── features/          # 业务模块（按业务拆分）
-│   ├── diary/         # ✅ 日记书写（DiaryPage, Editor, GuidedChat, store, types）
-│   ├── emotion/       # ✅ 情绪分析（Dashboard 趋势图/分布饼图, store, types, 后端 API）
-│   ├── family/        # ⬜ 原生家庭（BackgroundForm, InsightPanel, store, types）
+│   ├── diary/         # ✅ 日记书写 + 语义搜索（DiaryPage, PaperEditor, Calendar, SearchBar, store, types）
+│   ├── emotion/       # ✅ 情绪仪表盘（Dashboard 趋势图/分布饼图, store, types, 后端 API）
+│   ├── family/        # ✅ 原生家庭（FamilyPage 背景表单/AI提炼/技能卡片, store, types, 后端 API）
 │   ├── mindfulness/   # ✅ 正念练习（BreathingExercise, GratitudeJournal, EmotionAwareness, store, types, 后端 API）
 │   └── settings/      # ✅ 应用设置（AiSettingsPage, settings.store）
 ├── components/ui/     # 纯 UI 原子组件（Button, Input, Card, Badge）
@@ -61,15 +61,15 @@ src/
 
 ```
 zzdiary-server/src/main/java/com/zzdiary/
-├── controller/        # REST 接口层（参数校验 + 路由）
-├── service/           # 业务逻辑层（编排 + 事务）
-├── repository/        # 数据访问层（JDBC / JVector）
-├── model/entity/      # 数据库实体
-├── model/dto/         # 传输对象（Java record）
-└── infrastructure/    # 横切关注点
-    ├── encryption/    # AES-256-GCM + PBKDF2 密钥派生
-    ├── vector/        # JVector 语义检索
-    └── ai/            # AI 客户端（DeepSeek / Ollama）
+├── controller/           # REST 接口层（参数校验 + 路由）
+├── service/              # 业务逻辑层（编排 + 事务）
+├── repository/           # 数据访问层（JDBC）
+├── model/entity/         # 数据库实体
+├── model/dto/            # 传输对象（Java record）
+└── infrastructure/       # 横切关注点
+    ├── encryption/       # AES-256-GCM 加密服务
+    ├── vector/           # 语义搜索：EmbeddingService + VectorIndexManager（余弦相似度，可升级 JVector）
+    └── ai/               # AI 客户端（DeepSeek / Ollama）
 ```
 
 ### 后端依赖规则
@@ -91,6 +91,8 @@ zzdiary-server/src/main/java/com/zzdiary/
     → SanitizationService (PII 脱敏) → AiService (情绪分析，必须 AI 可用)
     → EncryptionService (加密日记原文) → DiaryRepository (SQLite 存储)
     → 分析结果持久化到 emotion_insights 表（每情绪标签一行）
+    → EmbeddingService.embedAndPersist() → Ollama /api/embeddings → 写入 diary_embeddings
+    → VectorIndexManager.add() → 内存索引追加
   ← AnalyzeResponse (JSON)
   ← React 渲染分析结果（侧边栏，会话内有效）
 
@@ -100,6 +102,15 @@ zzdiary-server/src/main/java/com/zzdiary/
     → 读取 emotion_insights（仅 AI 分析过的条目有数据）
   ← TrendPoint[] / EmotionDistribution[]
   ← EmotionDashboard 页面展示 Recharts 图表
+
+语义搜索
+  → POST /api/search/semantic { query }
+  → SearchService
+    → EmbeddingService.generateEmbedding(query) → OllamaClient.embed() → Ollama /api/embeddings
+    → VectorIndexManager.search(queryEmbedding, topK) → 内存余弦相似度 Top-K
+    → 查 diary_entries 解密摘要 → 返回 SearchResult[]
+  ← SearchResult[] (id, snippet, score, emotionTags, createdAt)
+  ← SearchBar 组件展示结果（日期/相似度/摘要），点击跳转日记详情
 
 正念练习推荐/记录
   → POST /api/mindfulness/recommend { "exerciseType": "breathing" }

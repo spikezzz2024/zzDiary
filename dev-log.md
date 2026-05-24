@@ -1,5 +1,47 @@
 # zzDiary 开发日志
 
+## 2026-05-24 (下午) — 语义搜索 + 嵌入模型自动安装
+
+### 新增文件 (10)
+
+| 文件 | 说明 |
+|------|------|
+| `zzdiary-server/.../model/dto/SearchRequest.java` | 搜索请求 DTO，query @NotBlank |
+| `zzdiary-server/.../model/dto/SearchResult.java` | 搜索结果 DTO（id, snippet, score, emotionTags, createdAt） |
+| `zzdiary-server/.../model/entity/DiaryEmbedding.java` | 嵌入向量实体 record |
+| `zzdiary-server/.../repository/DiaryEmbeddingRepository.java` | 嵌入 CRUD：upsert（save）、全量查询（findAll）、按 entryId 删除 |
+| `zzdiary-server/.../service/EmbeddingService.java` | Ollama 嵌入生成 + BLOB 序列化 + 启动加载 + 模型可用性检查 |
+| `zzdiary-server/.../service/VectorIndexManager.java` | 内存余弦相似度索引（ConcurrentHashMap + PriorityQueue Top-K） |
+| `zzdiary-server/.../service/SearchService.java` | 搜索编排：查询嵌入 → 向量搜索 → 解密摘要 |
+| `zzdiary-server/.../controller/SearchController.java` | `POST /api/search/semantic` + `GET /api/search/model-status` + `POST /api/search/pull-model` |
+| `src/features/diary/SearchBar.tsx` | 搜索栏组件：5 种状态（骨架屏 / 模型引导 / 下载中 / Ollama 未运行 / 搜索框） |
+| `src/features/diary/search.store.ts` | 搜索 Zustand store：查询/结果/模型状态/拉取 |
+
+### 修改文件 (9)
+
+| 文件 | 变更 |
+|------|------|
+| `schema.sql` | 新增 `diary_embeddings` 表（entry_id UNIQUE FK, embedding BLOB, model, dimension） |
+| `OllamaClient.java` | 新增 `embed()`（调用 `/api/embeddings`）、`listModelNames()`、`isModelPulled()` |
+| `DiaryService.java` | 注入 `EmbeddingService` / `VectorIndexManager`；`saveToday()` / `analyze()` / `analyzeExisting()` 后触发索引；`delete()` 清理嵌入 |
+| `DatabaseInitializer.java` | 启动时从 `diary_embeddings` 表加载全部向量到内存索引 |
+| `src/lib/api.ts` | 新增 `searchApi`（semantic / modelStatus / pullModel） |
+| `src/types/shared.ts` | 新增 `SearchResult` 接口 |
+| `src/features/diary/DiaryHistoryPage.tsx` | 集成 SearchBar，搜索时隐藏日历/列表 |
+| `memory-bank/architecture.md` | 更新模块状态、数据流（语义搜索 + 索引流） |
+| `memory-bank/api-endpoints.md` | 补充搜索端点详情 + 模型状态/拉取端点 |
+| `memory-bank/database-schema.md` | 新增 `diary_embeddings` 表文档 |
+
+### 设计决策
+
+- **不用 JVector，用内存余弦相似度。** 零额外依赖，<10K 日记时 <10ms。设计为可替换——`VectorIndexManager` 对外接口不变，换成 JVector 只改这一个类。
+- **嵌入模型 nomic-embed-text（768 维）**，唯一依赖 Ollama `/api/embeddings`。DeepSeek 无嵌入 API，仅做聊天。
+- **保存时索引 + 启动时全量加载**。`diary_embeddings` 表是持久化源，`VectorIndexManager` 是内存镜像。
+- **首次使用自动引导下载。** 搜索页检测模型状态，若 Ollama 已运行但模型未拉取，弹出引导卡片说明用途和大小（274MB），一键下载。
+- **搜索栏放在日记本页面。** 搜索时隐藏日历视图，结果按相似度降序，点击跳转详情页。
+
+---
+
 ## 2026-05-24 — 原生家庭背景功能
 
 ### 新增文件 (9)

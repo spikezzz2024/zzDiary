@@ -40,6 +40,16 @@ CREATE TABLE IF NOT EXISTS ai_settings (
     ollama_base_url TEXT DEFAULT 'http://localhost:11434'
 );
 
+CREATE TABLE IF NOT EXISTS diary_embeddings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    entry_id INTEGER NOT NULL UNIQUE,
+    embedding BLOB NOT NULL,
+    model TEXT NOT NULL,
+    dimension INTEGER NOT NULL,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (entry_id) REFERENCES diary_entries(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS mindfulness_exercises (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     exercise_type TEXT NOT NULL CHECK (exercise_type IN ('breathing', 'gratitude', 'emotion_awareness')),
