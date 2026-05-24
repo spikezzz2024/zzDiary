@@ -26,7 +26,9 @@
 | POST | `/api/family/background` | 录入/更新家庭背景 | FamilyController |
 | GET | `/api/family/background` | 获取家庭背景 | FamilyController |
 | GET | `/api/family/insights` | 获取家庭关联分析 | FamilyController |
-| GET | `/api/mindfulness/recommend` | 获取正念推荐 | MindfulnessController |
+| POST | `/api/mindfulness/recommend` | ✅ 生成正念推荐 | MindfulnessController |
+| POST | `/api/mindfulness/log` | ✅ 记录正念练习完成 | MindfulnessController |
+| GET | `/api/mindfulness/progress` | ✅ 获取正念进度统计 | MindfulnessController |
 | POST | `/api/search/semantic` | 语义搜索历史日记 | SearchController |
 | GET | `/actuator/health` | 健康检查 | Actuator |
 
@@ -78,6 +80,39 @@ Response: { "entryId": 1, "emotionTags": ["焦虑"], "intensity": 6, ... }
 ```
 Request:  { "query": "和妈妈吵架的那次" }
 Response: [{ "id": 1, "content": "...", "emotionTags": [...], "score": 0.92 }]
+```
+
+### POST /api/mindfulness/recommend
+
+> AI 根据近期情绪状态生成个性化正念推荐，结果持久化到 mindfulness_exercises 表。
+
+```
+Request:  { "exerciseType": null }  // 或 "breathing"|"gratitude"|"emotion_awareness"
+Response: { "id": 1, "exerciseType": "breathing", "recommendationText": "...", "createdAt": "..." }
+```
+
+### POST /api/mindfulness/log
+
+> 记录用户完成了一次正念练习。
+
+```
+Request:  { "exerciseId": 1, "durationSeconds": 120, "userContent": "..." }
+Response: { "logged": true }
+```
+
+### GET /api/mindfulness/progress
+
+> 获取正念练习进度统计。
+
+```
+Response: {
+  "totalCompleted": 15,
+  "currentStreak": 3,
+  "totalDurationSeconds": 1800,
+  "breathingCount": 5,
+  "gratitudeCount": 7,
+  "awarenessCount": 3
+}
 ```
 
 ---

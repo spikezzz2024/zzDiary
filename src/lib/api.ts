@@ -7,6 +7,11 @@ import type {
   FamilyBackground,
 } from '../types/shared';
 import type { TrendPoint } from '../features/emotion/types';
+import type {
+  MindfulnessRecommendResponse,
+  MindfulnessExerciseLog,
+  ProgressStats,
+} from '../features/mindfulness/types';
 
 const BASE = '/api';
 
@@ -76,4 +81,14 @@ export const familyApi = {
     significantEvents: string;
   }) => put<FamilyBackground>('/family/background', data),
   distill: () => post<{ skillSummary: string }>('/family/distill', {}),
+};
+
+// Mindfulness
+export const mindfulnessApi = {
+  recommend: (exerciseType?: string) =>
+    post<MindfulnessRecommendResponse>('/mindfulness/recommend',
+      { exerciseType: exerciseType ?? null }),
+  logExercise: (data: MindfulnessExerciseLog) =>
+    post<{ logged: boolean }>('/mindfulness/log', data),
+  getProgress: () => get<ProgressStats>('/mindfulness/progress'),
 };

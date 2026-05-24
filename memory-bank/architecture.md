@@ -41,7 +41,7 @@ src/
 │   ├── diary/         # ✅ 日记书写（DiaryPage, Editor, GuidedChat, store, types）
 │   ├── emotion/       # ✅ 情绪分析（Dashboard 趋势图/分布饼图, store, types, 后端 API）
 │   ├── family/        # ⬜ 原生家庭（BackgroundForm, InsightPanel, store, types）
-│   ├── mindfulness/   # ⬜ 正念练习（ExercisePlayer, GratitudeTemplate, store, types）
+│   ├── mindfulness/   # ✅ 正念练习（BreathingExercise, GratitudeJournal, EmotionAwareness, store, types, 后端 API）
 │   └── settings/      # ✅ 应用设置（AiSettingsPage, settings.store）
 ├── components/ui/     # 纯 UI 原子组件（Button, Input, Card, Badge）
 ├── hooks/             # 通用 Hooks（useApi）
@@ -100,6 +100,20 @@ zzdiary-server/src/main/java/com/zzdiary/
     → 读取 emotion_insights（仅 AI 分析过的条目有数据）
   ← TrendPoint[] / EmotionDistribution[]
   ← EmotionDashboard 页面展示 Recharts 图表
+
+正念练习推荐/记录
+  → POST /api/mindfulness/recommend { "exerciseType": "breathing" }
+  → MindfulnessService
+    → 读取 emotion_insights 汇总近期情绪
+    → AiService.generateMindfulnessRecommendation() 生成个性化练习
+    → 持久化到 mindfulness_exercises 表
+  ← MindfulnessRecommendResponse
+  ← MindfulnessPage 渲染 BreathingExercise / GratitudeJournal / EmotionAwareness
+
+  → POST /api/mindfulness/log (用户完成练习后)
+  → MindfulnessService
+    → 更新 mindfulness_exercises.completed = 1
+  ← ProgressStats 更新
 ```
 
 ## 外部通信

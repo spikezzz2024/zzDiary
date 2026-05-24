@@ -39,3 +39,15 @@ CREATE TABLE IF NOT EXISTS ai_settings (
     ollama_model TEXT DEFAULT 'qwen2.5:7b',
     ollama_base_url TEXT DEFAULT 'http://localhost:11434'
 );
+
+CREATE TABLE IF NOT EXISTS mindfulness_exercises (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    exercise_type TEXT NOT NULL CHECK (exercise_type IN ('breathing', 'gratitude', 'emotion_awareness')),
+    recommendation_text TEXT,
+    user_content TEXT,
+    duration_seconds INTEGER,
+    completed INTEGER DEFAULT 0 CHECK (completed IN (0, 1)),
+    completed_at TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);

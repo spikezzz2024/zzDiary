@@ -1,3 +1,4 @@
+import { Link } from 'react-router';
 import type { AnalyzeResponse } from '../../types/shared';
 import { EMOTION_COLORS, DEFAULT_EMOTION_META } from '../../lib/constants/emotions';
 
@@ -169,19 +170,26 @@ export default function AnalysisSidebar({ result, onDismiss }: Props) {
 
         {/* Mindfulness suggestion */}
         {result.mindfulnessSuggestion && (
-          <section
-            className="rounded-lg px-4 py-3 border"
+          <Link
+            to="/mindfulness"
+            className="block rounded-lg px-4 py-3 border cursor-pointer no-underline transition-shadow hover:shadow-sm"
             style={{
               backgroundColor: '#ecfdf5',
               borderColor: '#a7f3d0',
               color: '#065f46',
             }}
           >
-            <p className="text-xs font-medium mb-1">此刻可以做</p>
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-xs font-medium">此刻可以做</p>
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </div>
             <p className="text-xs leading-relaxed opacity-80">
               {result.mindfulnessSuggestion}
             </p>
-          </section>
+          </Link>
         )}
       </div>
     </aside>

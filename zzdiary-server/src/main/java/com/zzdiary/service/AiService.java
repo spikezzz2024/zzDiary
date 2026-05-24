@@ -61,6 +61,26 @@ public class AiService {
         return callAi(systemPrompt, userPrompt);
     }
 
+    /** Generate a mindfulness exercise recommendation. Returns parsed JSON text field. */
+    public String generateMindfulnessRecommendation(String systemPrompt, String userPrompt) {
+        String raw = callAi(systemPrompt, userPrompt);
+        return parseRecommendation(raw);
+    }
+
+    @SuppressWarnings("unchecked")
+    private String parseRecommendation(String raw) {
+        try {
+            String json = raw.trim();
+            if (json.startsWith("```")) {
+                json = json.replaceAll("```\\w*\\n?", "").replaceAll("```$", "").trim();
+            }
+            Map<String, Object> map = objectMapper.readValue(json, Map.class);
+            return (String) map.getOrDefault("recommendationText", "");
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("AI 正念推荐解析失败: " + raw, e);
+        }
+    }
+
     /** Call AI backend with given prompts and return the raw response string. */
     private String callAi(String systemPrompt, String userMessage) {
         var settings = aiConfigService.get();

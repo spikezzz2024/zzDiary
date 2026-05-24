@@ -4,6 +4,7 @@ import DiaryPage from './features/diary/DiaryPage';
 import DiaryHistoryPage from './features/diary/DiaryHistoryPage';
 import DiaryDetailPage from './features/diary/DiaryDetailPage';
 import EmotionDashboard from './features/emotion/EmotionDashboard';
+import MindfulnessPage from './features/mindfulness/MindfulnessPage';
 import FamilyPage from './features/family/FamilyPage';
 
 const NAV_LINK = 'text-sm transition-colors cursor-pointer';
@@ -42,6 +43,9 @@ function MainLayout() {
             <Link to="/emotion" className={linkClass('/emotion')} style={{ color: '#5c4a2e' }}>
               情绪
             </Link>
+            <Link to="/mindfulness" className={linkClass('/mindfulness')} style={{ color: '#5c4a2e' }}>
+              正念
+            </Link>
             <Link to="/settings" className={linkClass('/settings')} style={{ color: '#5c4a2e' }}>
               设置
             </Link>
@@ -57,6 +61,7 @@ function MainLayout() {
           <Route path="/diary/:id" element={<DiaryDetailPage />} />
           <Route path="/family" element={<FamilyPage />} />
           <Route path="/emotion" element={<EmotionDashboard />} />
+          <Route path="/mindfulness" element={<MindfulnessPage />} />
           <Route path="/settings" element={<AiSettingsPage />} />
         </Routes>
       </main>
