@@ -1,5 +1,43 @@
 # zzDiary 开发日志
 
+## 2026-05-24 (晚间) — 书写统计仪表盘 + 机械键盘打字音效
+
+### 新增文件 (13)
+
+| 文件 | 说明 |
+|------|------|
+| `zzdiary-server/.../controller/StatsController.java` | 统计 REST 接口：概览、热力图、时段分布 |
+| `zzdiary-server/.../service/StatsService.java` | 统计业务逻辑：解密后统计字数、连续天数计算、日期范围聚合 |
+| `zzdiary-server/.../model/dto/StatsOverview.java` | 统计概览 DTO（总篇数/总字数/日均字数/活跃天数/连续天数） |
+| `zzdiary-server/.../model/dto/HeatmapPoint.java` | 热力图数据点 DTO（日期/篇数） |
+| `zzdiary-server/.../model/dto/TimeDistributionPoint.java` | 时段分布数据点 DTO（小时/篇数） |
+| `src/features/stats/StatsPage.tsx` | 统计页面：概览卡片 + 日历热力图（周/月/年/全部） + Recharts 时段柱状图 |
+| `src/features/stats/stats.store.ts` | 统计 Zustand store：概览/热力图/时段分布三合一加载 |
+| `src/features/stats/types.ts` | 统计类型定义（StatsOverview / HeatmapPoint / TimeDistributionPoint） |
+| `src/hooks/useTypingSound.ts` | 键盘音效 Hook：随机播放 8 种机械键盘音效，60ms 防抖 |
+| `public/sounds/key-sounds/` | 8 个机械键盘 MP3 音效文件（mech1/2, mechanical-0~3, laptop, old-mech） |
+
+### 修改文件 (6)
+
+| 文件 | 变更 |
+|------|------|
+| `DiaryRepository.java` | 新增 `findAllEntries()`（全量查询）、`countByDateRange()`（日期聚合）、`getHourDistribution()`（小时分布） |
+| `src/lib/api.ts` | 新增 `statsApi`（getOverview / getHeatmap / getTimeDistribution） |
+| `src/App.tsx` | 新增 `/stats` 路由 + 导航栏"统计"入口 |
+| `src/features/diary/PaperEditor.tsx` | 集成 `useTypingSound`，打字时播放键盘音效 |
+| `package.json` | 新增 vitest / @testing-library/react / jsdom 等测试依赖 |
+| `memory-bank/` 3 个文档 | 更新模块状态 + API 端点 + 数据流 |
+
+### 设计决策
+
+- **字数统计在服务端解密后计算**，避免前端持有全量解密内容。统计非空白字符数。
+- **日历热力图纯 CSS 实现**，无第三方日历库。色阶从米色到深棕色，匹配纸张主题。支持周/月/年/全部四种时间范围。
+- **连续天数按自然日计算**，最近日期为今天或昨天则计入当前连续。
+- **键盘音效采用 8 个不同机械键盘声音随机轮播**，60ms 防抖避免连发。仅 PaperEditor 中启用，搜索/设置等其他输入框不触发。
+- **统计页面独立模块**，store/组件/types 按 features/stats/ 拆分，符合模块化规范。
+
+---
+
 ## 2026-05-24 (下午) — 语义搜索 + 嵌入模型自动安装
 
 ### 新增文件 (10)

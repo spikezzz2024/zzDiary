@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:sqlite:${java.io.tmpdir}/zzdiary-test.db
+    driver-class-name: org.sqlite.JDBC
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+
+zzdiary:
+  ai:
+    deepseek:
+      api-key: ""

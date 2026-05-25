@@ -128,6 +128,16 @@ zzdiary-server/src/main/java/com/zzdiary/
   ← ProgressStats 更新
 ```
 
+书写统计
+	  → GET /api/stats/overview /heatmap /time-distribution
+	  → StatsService
+	    → DiaryRepository.findAllEntries() → 解密每篇后统计非空白字符数
+	    → DiaryRepository.countByDateRange() → 按天聚合篇数
+	    → DiaryRepository.getHourDistribution() → 按小时聚合篇数
+	    → computeStreaks() → 从日期列表计算连续天数
+	  ← StatsOverview / HeatmapPoint[] / TimeDistributionPoint[]
+	  ← StatsPage 页面展示概览卡片 + 日历热力图 + Recharts 时段柱状图
+
 ## 外部通信
 
 - 前端 ↔ Spring Boot：HTTP REST over localhost（随机端口，Electron IPC 传递）
