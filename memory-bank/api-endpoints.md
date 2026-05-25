@@ -35,6 +35,7 @@
 | GET | `/api/stats/overview` | ✅ 书写统计概览（总篇数/字数/连续天数） | StatsController |
 | GET | `/api/stats/heatmap` | ✅ 日历热力图数据 | StatsController |
 | GET | `/api/stats/time-distribution` | ✅ 书写时段分布 | StatsController |
+| GET | `/api/export/diaries` | ✅ 导出日记为 Markdown/JSON 文件下载 | ExportController |
 | GET | `/actuator/health` | 健康检查 | Actuator |
 
 ---
@@ -187,6 +188,20 @@ Response: [{ "date": "2026-01-01", "count": 2 }]
 ```
 Response: [{ "hour": 21, "count": 15 }, { "hour": 8, "count": 3 }]
 ```
+
+---
+
+### GET /api/export/diaries
+
+> 导出日记数据为文件下载。支持 Markdown（含情绪标签/强度/根因/正念建议）和 JSON 两种格式，可选日期范围过滤。
+
+```
+Query:    format=markdown|json&from=2026-01-01&to=2026-05-25
+Response: 文件下载 (Content-Disposition: attachment; filename="zzdiary-export-2026-05-25.md")
+```
+
+Markdown 格式每篇日记为一个二级标题区块，包含日期、情绪标签、强度、正念建议和正文。
+JSON 格式为日记对象数组，包含 id、createdAt、content、emotionTags、emotionIntensity、possibleRootCause、mindfulnessSuggestion。
 
 ---
 

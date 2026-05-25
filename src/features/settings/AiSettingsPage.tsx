@@ -3,6 +3,7 @@ import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Input from '../../components/ui/Input';
 import { useSettingsStore } from './settings.store';
+import ExportSection from './ExportSection';
 
 export default function AiSettingsPage() {
   const { ai, ollamaAvailable, loading, saving, fetchAiSettings, updateAiSettings, checkOllama } =
@@ -188,6 +189,11 @@ export default function AiSettingsPage() {
           </div>
         </Card>
       )}
+
+      {/* Export section */}
+      <div className="mt-8">
+        <ExportSection />
+      </div>
     </div>
   );
 }

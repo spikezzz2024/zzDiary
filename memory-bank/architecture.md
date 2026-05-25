@@ -43,7 +43,7 @@ src/
 │   ├── family/        # ✅ 原生家庭（FamilyPage 背景表单/AI提炼/技能卡片, store, types, 后端 API）
 │   ├── mindfulness/   # ✅ 正念练习（BreathingExercise, GratitudeJournal, EmotionAwareness, store, types, 后端 API）
 │   ├── stats/         # ✅ 书写统计（StatsPage 热力图/时段分布/概览卡片, store, types, 后端 API）
-│   └── settings/      # ✅ 应用设置（AiSettingsPage, settings.store）
+│   └── settings/      # ✅ 应用设置（AiSettingsPage, ExportSection, settings.store）
 ├── components/ui/     # 纯 UI 原子组件（Button, Input, Card, Badge）
 ├── hooks/             # 通用 Hooks（useApi）
 ├── lib/               # API 客户端 + 常量
@@ -137,6 +137,15 @@ zzdiary-server/src/main/java/com/zzdiary/
 	    → computeStreaks() → 从日期列表计算连续天数
 	  ← StatsOverview / HeatmapPoint[] / TimeDistributionPoint[]
 	  ← StatsPage 页面展示概览卡片 + 日历热力图 + Recharts 时段柱状图
+
+数据导出
+	  → GET /api/export/diaries?format=markdown|json&from=&to=
+	  → ExportService
+	    → DiaryRepository.findByDateRange() → 解密每篇日记正文
+	    → EmotionInsightRepository.findAllByEntryIds() → 附加情绪洞察
+	    → 格式化 Markdown（日期/情绪/强度/根因/正文）或 JSON 数组
+	  ← 文件下载 (Content-Disposition: attachment)
+	  ← 设置页 ExportSection 触发下载（日期范围/格式选择）
 
 ## 外部通信
 

@@ -112,6 +112,30 @@ export const statsApi = {
     get<import('../features/stats/types').TimeDistributionPoint[]>('/stats/time-distribution'),
 };
 
+// Export
+export const exportApi = {
+  download: async (format: 'markdown' | 'json', from?: string, to?: string): Promise<void> => {
+    const params = new URLSearchParams();
+    params.set('format', format);
+    if (from) params.set('from', from);
+    if (to) params.set('to', to);
+    const res = await fetch(`/api/export/diaries?${params.toString()}`);
+    if (!res.ok) throw new Error('Export failed');
+    const blob = await res.blob();
+    const disposition = res.headers.get('Content-Disposition');
+    const match = disposition?.match(/filename="(.+)"/);
+    const filename = match?.[1] ?? `zzdiary-export.${format === 'json' ? 'json' : 'md'}`;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  },
+};
+
 // Mindfulness
 export const mindfulnessApi = {
   recommend: (exerciseType?: string) =>
