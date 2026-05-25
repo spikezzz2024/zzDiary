@@ -23,3 +23,5 @@ node_modules/
 dist/
 build/
 *.class
+out/
+release/

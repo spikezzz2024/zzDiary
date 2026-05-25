@@ -14,7 +14,14 @@ import type {
   ProgressStats,
 } from '../features/mindfulness/types';
 
-const BASE = '/api';
+function getBaseUrl(): string {
+  if (typeof window !== 'undefined' && window.__ZZDIARY_PORT__) {
+    return `http://127.0.0.1:${window.__ZZDIARY_PORT__}/api`;
+  }
+  return '/api';
+}
+
+const BASE = getBaseUrl();
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${url}`, {
@@ -119,7 +126,7 @@ export const exportApi = {
     params.set('format', format);
     if (from) params.set('from', from);
     if (to) params.set('to', to);
-    const res = await fetch(`/api/export/diaries?${params.toString()}`);
+    const res = await fetch(`${BASE}/export/diaries?${params.toString()}`);
     if (!res.ok) throw new Error('Export failed');
     const blob = await res.blob();
     const disposition = res.headers.get('Content-Disposition');

@@ -30,3 +30,17 @@ dependencies {
 tasks.withType<Test> {
 	useJUnitPlatform()
 }
+
+tasks.register<Copy>("copyFrontend") {
+	from("../out/renderer")
+	into(layout.buildDirectory.dir("resources/main/static"))
+	doFirst {
+		logger.lifecycle("Copying frontend from ../out/renderer to resources/main/static")
+	}
+}
+
+tasks.named("processResources") {
+	if (tasks.findByName("copyFrontend") != null) {
+		dependsOn("copyFrontend")
+	}
+}
