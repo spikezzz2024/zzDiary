@@ -98,6 +98,20 @@ export const searchApi = {
   pullModel: () => post<{ status: string; message?: string }>('/search/pull-model', {}),
 };
 
+// Stats
+export const statsApi = {
+  getOverview: () => get<import('../features/stats/types').StatsOverview>('/stats/overview'),
+  getHeatmap: (from?: string, to?: string) => {
+    const params = new URLSearchParams();
+    if (from) params.set('from', from);
+    if (to) params.set('to', to);
+    return get<import('../features/stats/types').HeatmapPoint[]>(
+      `/stats/heatmap?${params.toString()}`);
+  },
+  getTimeDistribution: () =>
+    get<import('../features/stats/types').TimeDistributionPoint[]>('/stats/time-distribution'),
+};
+
 // Mindfulness
 export const mindfulnessApi = {
   recommend: (exerciseType?: string) =>

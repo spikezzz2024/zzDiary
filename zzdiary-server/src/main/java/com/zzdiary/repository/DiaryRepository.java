@@ -73,6 +73,27 @@ public class DiaryRepository {
         return jdbc.query(sql, this::mapRow, from, to);
     }
 
+    public List<java.util.Map<String, Object>> countByDateRange(String from, String to) {
+        var sql = """
+                SELECT date(created_at) AS entry_date, COUNT(*) AS cnt
+                FROM diary_entries
+                WHERE date(created_at) >= ? AND date(created_at) <= ?
+                GROUP BY entry_date
+                ORDER BY entry_date ASC
+                """;
+        return jdbc.queryForList(sql, from, to);
+    }
+
+    public List<java.util.Map<String, Object>> getHourDistribution() {
+        var sql = """
+                SELECT CAST(strftime('%H', created_at) AS INTEGER) AS hour, COUNT(*) AS cnt
+                FROM diary_entries
+                GROUP BY hour
+                ORDER BY hour
+                """;
+        return jdbc.queryForList(sql);
+    }
+
     /** Get all entries ordered by date, for aggregation queries. */
     public List<DiaryEntry> findAllEntries() {
         var sql = "SELECT * FROM diary_entries ORDER BY created_at ASC";

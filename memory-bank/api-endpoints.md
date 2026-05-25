@@ -32,6 +32,9 @@
 | POST | `/api/search/semantic` | ✅ 语义搜索历史日记（Ollama 嵌入 + 余弦相似度） | SearchController |
 | GET | `/api/search/model-status` | ✅ 检查嵌入模型下载状态 | SearchController |
 | POST | `/api/search/pull-model` | ✅ 拉取嵌入模型（nomic-embed-text, ~274MB） | SearchController |
+| GET | `/api/stats/overview` | ✅ 书写统计概览（总篇数/字数/连续天数） | StatsController |
+| GET | `/api/stats/heatmap` | ✅ 日历热力图数据 | StatsController |
+| GET | `/api/stats/time-distribution` | ✅ 书写时段分布 | StatsController |
 | GET | `/actuator/health` | 健康检查 | Actuator |
 
 ---
@@ -151,6 +154,38 @@ Response: {
   "gratitudeCount": 7,
   "awarenessCount": 3
 }
+```
+
+### GET /api/stats/overview
+
+> 返回书写统计概览数据。字数通过服务端解密日记正文后统计非空白字符数得出。
+
+```
+Response: {
+  "totalEntries": 42,
+  "totalChars": 12500,
+  "avgCharsPerEntry": 297,
+  "activeDays": 30,
+  "currentStreak": 5,
+  "longestStreak": 12
+}
+```
+
+### GET /api/stats/heatmap
+
+> 返回每日日记篇数，用于日历热力图。可选 from/to 过滤日期范围。
+
+```
+Query:    from=2026-01-01&to=2026-05-25
+Response: [{ "date": "2026-01-01", "count": 2 }]
+```
+
+### GET /api/stats/time-distribution
+
+> 返回 24 小时各时段日记篇数分布。
+
+```
+Response: [{ "hour": 21, "count": 15 }, { "hour": 8, "count": 3 }]
 ```
 
 ---

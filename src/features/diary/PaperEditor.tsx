@@ -1,6 +1,7 @@
 import { useDiaryStore } from './diary.store';
 import { usePaperStore } from './paper.store';
 import type { PaperMaterial } from './paper.store';
+import { useTypingSound, SOUND_PROFILE_KEYS } from '../../hooks/useTypingSound';
 
 const PAPER_LABELS: Record<PaperMaterial, string> = {
   grid: '作文纸',
@@ -11,10 +12,15 @@ const PAPER_LABELS: Record<PaperMaterial, string> = {
 export default function PaperEditor() {
   const { content, analyzing, setContent, analyze } = useDiaryStore();
   const { material, color } = usePaperStore();
+  const { play, profile, setProfile, enabled, setEnabled, volume, setVolume } = useTypingSound();
 
   const handleAnalyze = () => {
     if (content.trim().length === 0) return;
     analyze();
+  };
+
+  const handleKeyDown = () => {
+    play();
   };
 
   return (
@@ -59,19 +65,68 @@ export default function PaperEditor() {
           placeholder="今天发生了什么？在这里自由地写下来..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
+          onKeyDown={handleKeyDown}
           disabled={analyzing}
         />
       </div>
 
       {/* Bottom bar */}
       <div className="flex items-center justify-between text-sm shrink-0">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <span
             className="text-xs"
             style={{ color: 'var(--paper-text-secondary)' }}
           >
             {PAPER_LABELS[material]}
           </span>
+          <span className="text-xs" style={{ color: '#d0c8b8' }}>|</span>
+          {/* Sound toggle */}
+          <button
+            onClick={() => setEnabled(!enabled)}
+            className="text-xs cursor-pointer transition-colors hover:opacity-80"
+            style={{ color: 'var(--paper-text-secondary)' }}
+            title={enabled ? '关闭音效' : '开启音效'}
+          >
+            {enabled ? (
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8 8 0 010 11.9M6.5 8.8l3.7-3.7c.5-.5 1.7-.2 1.7.6v12.6c0 .8-1.2 1.1-1.7.6l-3.7-3.7H4.3c-.7 0-1.3-.6-1.3-1.3v-4.8c0-.7.6-1.3 1.3-1.3h2.2z" />
+              </svg>
+            ) : (
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+              </svg>
+            )}
+          </button>
+          {/* Profile selector */}
+          <select
+            value={profile}
+            onChange={(e) => setProfile(e.target.value as typeof profile)}
+            className="text-xs bg-transparent border rounded px-1.5 py-0.5 cursor-pointer focus:outline-none"
+            style={{ color: 'var(--paper-text-secondary)', borderColor: '#d0c8b8' }}
+          >
+            {SOUND_PROFILE_KEYS.map(k => (
+              <option key={k} value={k}>
+                {k === 'mechanical' ? '机械键盘' :
+                 k === 'mech1' ? '机械键盘1' :
+                 k === 'mech2' ? '机械键盘2' :
+                 k === 'old-mech' ? '老式机械' : '笔记本键盘'}
+              </option>
+            ))}
+          </select>
+          {/* Volume slider */}
+          <input
+            type="range"
+            min={0}
+            max={100}
+            value={volume}
+            onChange={(e) => setVolume(Number(e.target.value))}
+            className="w-16 h-1 cursor-pointer"
+            style={{ accentColor: '#8b7355' }}
+          />
           <span
             className="text-xs"
             style={{ color: 'var(--paper-text-secondary)' }}

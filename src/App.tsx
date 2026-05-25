@@ -6,6 +6,7 @@ import DiaryDetailPage from './features/diary/DiaryDetailPage';
 import EmotionDashboard from './features/emotion/EmotionDashboard';
 import MindfulnessPage from './features/mindfulness/MindfulnessPage';
 import FamilyPage from './features/family/FamilyPage';
+import StatsPage from './features/stats/StatsPage';
 
 const NAV_LINK = 'text-sm transition-colors cursor-pointer';
 const NAV_ACTIVE = 'font-medium';
@@ -49,6 +50,9 @@ function MainLayout() {
             <Link to="/settings" className={linkClass('/settings')} style={{ color: '#5c4a2e' }}>
               设置
             </Link>
+            <Link to="/stats" className={linkClass('/stats')} style={{ color: '#5c4a2e' }}>
+              统计
+            </Link>
           </nav>
         </div>
       </header>
@@ -63,6 +67,7 @@ function MainLayout() {
           <Route path="/emotion" element={<EmotionDashboard />} />
           <Route path="/mindfulness" element={<MindfulnessPage />} />
           <Route path="/settings" element={<AiSettingsPage />} />
+          <Route path="/stats" element={<StatsPage />} />
         </Routes>
       </main>
     </div>
