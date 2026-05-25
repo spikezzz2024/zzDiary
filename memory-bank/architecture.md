@@ -43,7 +43,8 @@ src/
 │   ├── family/        # ✅ 原生家庭（FamilyPage 背景表单/AI提炼/技能卡片, store, types, 后端 API）
 │   ├── mindfulness/   # ✅ 正念练习（BreathingExercise, GratitudeJournal, EmotionAwareness, store, types, 后端 API）
 │   ├── stats/         # ✅ 书写统计（StatsPage 热力图/时段分布/概览卡片, store, types, 后端 API）
-│   └── settings/      # ✅ 应用设置（AiSettingsPage, ExportSection, settings.store）
+│   ├── settings/      # ✅ 应用设置（AiSettingsPage, ExportSection, settings.store）
+│   └── theme/         # ✅ 主题系统（ThemeToggle, AppearanceSection, ThemeProvider, theme.store）
 ├── components/ui/     # 纯 UI 原子组件（Button, Input, Card, Badge）
 ├── hooks/             # 通用 Hooks（useApi）
 ├── lib/               # API 客户端 + 常量

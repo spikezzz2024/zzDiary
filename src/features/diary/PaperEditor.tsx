@@ -57,7 +57,7 @@ export default function PaperEditor() {
           className="absolute inset-0 w-full h-full resize-none bg-transparent text-lg leading-8 placeholder-gray-400/60 focus:outline-none"
           style={{
             color: 'var(--paper-text)',
-            fontFamily: "'KaiTi', 'STKaiti', 'Noto Serif SC', 'SimSun', serif",
+            fontFamily: 'var(--font-family-editor)',
             fontSize: '18px',
             lineHeight: material === 'grid' ? '32px' : '29px',
             padding: material === 'grid' ? '16px 24px 16px 48px' : '20px 24px 20px 48px',
@@ -79,7 +79,7 @@ export default function PaperEditor() {
           >
             {PAPER_LABELS[material]}
           </span>
-          <span className="text-xs" style={{ color: '#d0c8b8' }}>|</span>
+          <span className="text-xs" style={{ color: 'var(--app-border)' }}>|</span>
           {/* Sound toggle */}
           <button
             onClick={() => setEnabled(!enabled)}
@@ -106,7 +106,7 @@ export default function PaperEditor() {
             value={profile}
             onChange={(e) => setProfile(e.target.value as typeof profile)}
             className="text-xs bg-transparent border rounded px-1.5 py-0.5 cursor-pointer focus:outline-none"
-            style={{ color: 'var(--paper-text-secondary)', borderColor: '#d0c8b8' }}
+            style={{ color: 'var(--paper-text-secondary)', borderColor: 'var(--app-border)' }}
           >
             {SOUND_PROFILE_KEYS.map(k => (
               <option key={k} value={k}>
@@ -125,7 +125,7 @@ export default function PaperEditor() {
             value={volume}
             onChange={(e) => setVolume(Number(e.target.value))}
             className="w-16 h-1 cursor-pointer"
-            style={{ accentColor: '#8b7355' }}
+            style={{ accentColor: 'var(--app-accent)' }}
           />
           <span
             className="text-xs"

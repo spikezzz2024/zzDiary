@@ -36,7 +36,7 @@ export default function GratitudeJournal({ exerciseId, recommendationText, onCom
 
   const inputClass = `w-full rounded-lg border px-4 py-3 text-sm leading-relaxed resize-none outline-none transition-colors
     bg-[var(--paper-bg)] border-[var(--paper-border)] text-[var(--paper-text)]
-    placeholder:text-[var(--paper-text-secondary)] focus:border-[#c4b89a] focus:ring-1 focus:ring-[#c4b89a]`;
+    placeholder:text-[var(--paper-text-secondary)] focus:border-[var(--app-accent)] focus:ring-1 focus:ring-[var(--app-accent)]`;
 
   return (
     <div className="rounded-xl border p-6 space-y-5"

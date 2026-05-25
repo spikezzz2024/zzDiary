@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 export type PaperMaterial = 'grid' | 'lined' | 'blank';
-export type PaperColor = 'classic' | 'rice' | 'dark' | 'blue';
+export type PaperColor = 'classic' | 'rice' | 'warm' | 'forest' | 'lavender' | 'slate' | 'dark' | 'blue';
 
 export interface PaperPreferences {
   material: PaperMaterial;

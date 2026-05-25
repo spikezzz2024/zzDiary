@@ -51,7 +51,7 @@ export default function SearchBar() {
       <div
         className="rounded-xl border p-5 flex flex-col items-center gap-3"
         style={{
-          backgroundColor: '#fdfaf5',
+          backgroundColor: 'var(--app-surface-alt)',
           borderColor: 'var(--paper-border)',
         }}
       >

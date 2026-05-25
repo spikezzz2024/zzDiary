@@ -5,13 +5,89 @@ body {
   font-family: 'Noto Serif SC', 'Source Han Serif SC', 'STSong', 'SimSun', 'KaiTi', serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
 }
 
 #root {
   min-height: 100vh;
 }
 
-/* Default paper theme (classic) */
+/* ===== App Chrome Variables (Light Mode = Default) ===== */
+
+:root {
+  --app-bg: #f5f0e8;
+  --app-surface: #faf7f2;
+  --app-surface-alt: #fdfaf5;
+  --app-text: #4a3728;
+  --app-text-secondary: #8b7355;
+  --app-border: #e0d8c8;
+  --app-accent: #b8860b;
+  --app-accent-text: #ffffff;
+
+  /* Typography defaults */
+  --font-size-base: 1rem;
+  --font-size-sm: 0.875rem;
+  --font-size-xs: 0.75rem;
+  --font-family-body: 'Noto Serif SC', 'Source Han Serif SC', 'STSong', 'SimSun', serif;
+  --font-family-editor: 'KaiTi', 'STKaiti', 'Noto Serif SC', serif;
+  --line-height-base: 1.6;
+  --line-height-relaxed: 1.75;
+}
+
+/* ===== Dark Mode Overrides ===== */
+
+html[data-theme-mode="dark"] {
+  --app-bg: #1a1814;
+  --app-surface: #25221d;
+  --app-surface-alt: #2c2923;
+  --app-text: #e0d8c8;
+  --app-text-secondary: #a09880;
+  --app-border: #3d3830;
+  --app-accent-text: #1a1814;
+  /* --app-accent is set via style attribute for user-customizable accent */
+}
+
+/* ===== Typography: Font Size ===== */
+
+html[data-font-size="small"] {
+  --font-size-base: 0.875rem;
+  --font-size-sm: 0.8125rem;
+  --font-size-xs: 0.6875rem;
+}
+
+html[data-font-size="medium"] {
+  --font-size-base: 1rem;
+  --font-size-sm: 0.875rem;
+  --font-size-xs: 0.75rem;
+}
+
+html[data-font-size="large"] {
+  --font-size-base: 1.125rem;
+  --font-size-sm: 1rem;
+  --font-size-xs: 0.8125rem;
+}
+
+/* ===== Typography: Line Spacing ===== */
+
+html[data-line-spacing="compact"] {
+  --line-height-base: 1.4;
+  --line-height-relaxed: 1.55;
+}
+
+html[data-line-spacing="normal"] {
+  --line-height-base: 1.6;
+  --line-height-relaxed: 1.75;
+}
+
+html[data-line-spacing="relaxed"] {
+  --line-height-base: 1.8;
+  --line-height-relaxed: 2.0;
+}
+
+/* ===== Paper Color Themes (8 colors, light mode) ===== */
+
+/* Default paper variables (classic) — used when no data-paper-color ancestor is present */
 :root {
   --paper-bg: #fdf5e6;
   --paper-grid: #d4c5a0;
@@ -24,8 +100,7 @@ body {
   --sidebar-bg: #faf6ee;
 }
 
-/* ===== Paper Color Themes ===== */
-
+/* Classic (米黄) */
 [data-paper-color="classic"] {
   --paper-bg: #fdf5e6;
   --paper-grid: #d4c5a0;
@@ -38,6 +113,7 @@ body {
   --sidebar-bg: #faf6ee;
 }
 
+/* Rice (宣纸素白) */
 [data-paper-color="rice"] {
   --paper-bg: #faf8f5;
   --paper-grid: #d8d0c0;
@@ -50,6 +126,59 @@ body {
   --sidebar-bg: #f7f4ef;
 }
 
+/* Warm (暖桃) */
+[data-paper-color="warm"] {
+  --paper-bg: #fef7f0;
+  --paper-grid: #e0cfbe;
+  --paper-line: #d4c4b4;
+  --paper-margin: #c89080;
+  --paper-text: #4a3030;
+  --paper-text-secondary: #8b6058;
+  --paper-accent: #c47a4a;
+  --paper-border: #e0cfbe;
+  --sidebar-bg: #fdf3ea;
+}
+
+/* Forest (林间绿) */
+[data-paper-color="forest"] {
+  --paper-bg: #f2f5ee;
+  --paper-grid: #c4cebc;
+  --paper-line: #b8c2b0;
+  --paper-margin: #8fa880;
+  --paper-text: #2d3a28;
+  --paper-text-secondary: #5a6b52;
+  --paper-accent: #5a8a4a;
+  --paper-border: #c4cebc;
+  --sidebar-bg: #eef3ea;
+}
+
+/* Lavender (薰衣草) */
+[data-paper-color="lavender"] {
+  --paper-bg: #f6f3fa;
+  --paper-grid: #d0c8e0;
+  --paper-line: #c4bcd4;
+  --paper-margin: #a898b8;
+  --paper-text: #38304a;
+  --paper-text-secondary: #6a5e82;
+  --paper-accent: #7a5ea8;
+  --paper-border: #d0c8e0;
+  --sidebar-bg: #f2eff8;
+}
+
+/* Slate (素灰) */
+[data-paper-color="slate"] {
+  --paper-bg: #f5f4f2;
+  --paper-grid: #d0cec8;
+  --paper-line: #c4c2bc;
+  --paper-margin: #a09890;
+  --paper-text: #383430;
+  --paper-text-secondary: #706860;
+  --paper-accent: #6a8a9a;
+  --paper-border: #d0cec8;
+  --sidebar-bg: #f2f1ef;
+}
+
+/* Dark (暗夜暖灯) */
 [data-paper-color="dark"] {
   --paper-bg: #2c2416;
   --paper-grid: #4a3f2f;
@@ -62,6 +191,7 @@ body {
   --sidebar-bg: #322b1e;
 }
 
+/* Blue (护眼青绿) */
 [data-paper-color="blue"] {
   --paper-bg: #e8f0e8;
   --paper-grid: #b8c8b8;
@@ -74,13 +204,123 @@ body {
   --sidebar-bg: #e0eae0;
 }
 
+/* ===== Paper Color Themes (dark mode adaptations) ===== */
+
+/* Default dark paper variables — used when no data-paper-color ancestor is present */
+html[data-theme-mode="dark"] {
+  --paper-bg: #242018;
+  --paper-grid: #3d3528;
+  --paper-line: #353025;
+  --paper-margin: #a07060;
+  --paper-text: #e0d8c8;
+  --paper-text-secondary: #a09880;
+  --paper-accent: #d4a844;
+  --paper-border: #3d3528;
+  --sidebar-bg: #2c2820;
+}
+
+html[data-theme-mode="dark"] [data-paper-color="classic"] {
+  --paper-bg: #242018;
+  --paper-grid: #3d3528;
+  --paper-line: #353025;
+  --paper-margin: #a07060;
+  --paper-text: #e0d8c8;
+  --paper-text-secondary: #a09880;
+  --paper-accent: #d4a844;
+  --paper-border: #3d3528;
+  --sidebar-bg: #2c2820;
+}
+
+html[data-theme-mode="dark"] [data-paper-color="rice"] {
+  --paper-bg: #22201d;
+  --paper-grid: #3a3630;
+  --paper-line: #322e28;
+  --paper-margin: #9a7a6a;
+  --paper-text: #dcd4c8;
+  --paper-text-secondary: #9a9280;
+  --paper-accent: #c4a034;
+  --paper-border: #3a3630;
+  --sidebar-bg: #2a2722;
+}
+
+html[data-theme-mode="dark"] [data-paper-color="warm"] {
+  --paper-bg: #241e1a;
+  --paper-grid: #3d3228;
+  --paper-line: #352c24;
+  --paper-margin: #a87860;
+  --paper-text: #e0d0c4;
+  --paper-text-secondary: #a08878;
+  --paper-accent: #d4945a;
+  --paper-border: #3d3228;
+  --sidebar-bg: #2c2620;
+}
+
+html[data-theme-mode="dark"] [data-paper-color="forest"] {
+  --paper-bg: #1c221c;
+  --paper-grid: #2d3a2d;
+  --paper-line: #283428;
+  --paper-margin: #6a9070;
+  --paper-text: #c8dcc8;
+  --paper-text-secondary: #8aa088;
+  --paper-accent: #6aaa5a;
+  --paper-border: #2d3a2d;
+  --sidebar-bg: #222a22;
+}
+
+html[data-theme-mode="dark"] [data-paper-color="lavender"] {
+  --paper-bg: #1e1c24;
+  --paper-grid: #322e3d;
+  --paper-line: #2c2835;
+  --paper-margin: #8878a0;
+  --paper-text: #d0c8e0;
+  --paper-text-secondary: #988ab0;
+  --paper-accent: #9a7ec8;
+  --paper-border: #322e3d;
+  --sidebar-bg: #26222c;
+}
+
+html[data-theme-mode="dark"] [data-paper-color="slate"] {
+  --paper-bg: #1e1d1c;
+  --paper-grid: #353330;
+  --paper-line: #302e2a;
+  --paper-margin: #887870;
+  --paper-text: #d8d4d0;
+  --paper-text-secondary: #989088;
+  --paper-accent: #7a9aaa;
+  --paper-border: #353330;
+  --sidebar-bg: #262422;
+}
+
+html[data-theme-mode="dark"] [data-paper-color="dark"] {
+  --paper-bg: #1a1610;
+  --paper-grid: #302820;
+  --paper-line: #282218;
+  --paper-margin: #704848;
+  --paper-text: #d8ccb8;
+  --paper-text-secondary: #988870;
+  --paper-accent: #c49838;
+  --paper-border: #302820;
+  --sidebar-bg: #221e18;
+}
+
+html[data-theme-mode="dark"] [data-paper-color="blue"] {
+  --paper-bg: #182018;
+  --paper-grid: #283428;
+  --paper-line: #223022;
+  --paper-margin: #708a78;
+  --paper-text: #c8d8c8;
+  --paper-text-secondary: #88a088;
+  --paper-accent: #5a8c6a;
+  --paper-border: #283428;
+  --sidebar-bg: #1e281e;
+}
+
 /* ===== Paper Materials ===== */
 
-/* Grid paper (田字格 / 作文纸) */
+/* Grid paper */
 .paper-grid {
   background-color: var(--paper-bg);
   background-image:
-    /* Horizontal lines */
     repeating-linear-gradient(
       to bottom,
       transparent,
@@ -88,7 +328,6 @@ body {
       var(--paper-grid) 31px,
       var(--paper-grid) 32px
     ),
-    /* Vertical lines */
     repeating-linear-gradient(
       to right,
       transparent,
@@ -99,11 +338,10 @@ body {
   background-position: 0 0, 0 0;
 }
 
-/* Lined paper (横线纸) */
+/* Lined paper */
 .paper-lined {
   background-color: var(--paper-bg);
   background-image:
-    /* Horizontal lines */
     repeating-linear-gradient(
       to bottom,
       transparent,
@@ -111,7 +349,6 @@ body {
       var(--paper-line) 28px,
       var(--paper-line) 29px
     ),
-    /* Left margin line */
     linear-gradient(
       to right,
       var(--paper-margin) 0px,
@@ -122,7 +359,7 @@ body {
   background-position: 0 0, 0 0;
 }
 
-/* Blank paper (白纸) */
+/* Blank paper */
 .paper-blank {
   background-color: var(--paper-bg);
   background-image:
@@ -138,7 +375,7 @@ body {
   color: var(--paper-text);
 }
 
-/* ===== Paper texture overlay ===== */
+/* ===== Paper Texture Overlay ===== */
 
 .paper-texture::after {
   content: '';

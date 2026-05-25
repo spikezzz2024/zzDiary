@@ -120,7 +120,7 @@ function CalendarHeatmap({ data, range }: { data: HeatmapPoint[]; range: TimeRan
             key={i}
             className="text-xs"
             style={{
-              color: '#8b7355',
+              color: 'var(--app-text-secondary)',
               marginLeft: i === 0 ? `${m.weekIdx * 14}px` : `${(m.weekIdx - monthLabels[i - 1].weekIdx) * 14}px`,
               marginRight: '2px',
             }}
@@ -133,7 +133,7 @@ function CalendarHeatmap({ data, range }: { data: HeatmapPoint[]; range: TimeRan
         {/* Day labels */}
         <div className="flex flex-col mr-1.5 gap-0.5">
           {dayLabels.map((d, i) => (
-            <span key={i} className="text-[10px] leading-[12px] h-3 w-6 text-right" style={{ color: '#8b7355' }}>
+            <span key={i} className="text-[10px] leading-[12px] h-3 w-6 text-right" style={{ color: 'var(--app-text-secondary)' }}>
               {i % 2 === 0 ? d : ''}
             </span>
           ))}
@@ -159,7 +159,7 @@ function CalendarHeatmap({ data, range }: { data: HeatmapPoint[]; range: TimeRan
       </div>
       {/* Legend */}
       <div className="flex items-center gap-1 mt-2 ml-8">
-        <span className="text-[10px]" style={{ color: '#8b7355' }}>少</span>
+        <span className="text-[10px]" style={{ color: 'var(--app-text-secondary)' }}>少</span>
         {[0, 0, 1, 2, 3, 4].map((level, i) => (
           <div
             key={i}
@@ -167,7 +167,7 @@ function CalendarHeatmap({ data, range }: { data: HeatmapPoint[]; range: TimeRan
             style={{ backgroundColor: getColor(level) }}
           />
         ))}
-        <span className="text-[10px]" style={{ color: '#8b7355' }}>多</span>
+        <span className="text-[10px]" style={{ color: 'var(--app-text-secondary)' }}>多</span>
       </div>
     </div>
   );
@@ -193,7 +193,7 @@ export default function StatsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <span style={{ color: '#8b7355' }}>加载中...</span>
+        <span style={{ color: 'var(--app-text-secondary)' }}>加载中...</span>
       </div>
     );
   }
@@ -215,7 +215,7 @@ export default function StatsPage() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-lg font-medium" style={{ color: '#5c4a2e' }}>书写统计</h2>
+      <h2 className="text-lg font-medium" style={{ color: 'var(--app-text)' }}>书写统计</h2>
 
       {/* Overview Cards */}
       {overview && (
@@ -226,12 +226,12 @@ export default function StatsPage() {
               <div
                 key={c.key}
                 className="rounded-lg p-4 text-center"
-                style={{ backgroundColor: '#faf7f2', border: '1px solid #e0d8c8' }}
+                style={{ backgroundColor: 'var(--app-surface)', border: '1px solid var(--app-border)' }}
               >
-                <div className="text-2xl font-semibold" style={{ color: '#5c4a2e' }}>
+                <div className="text-2xl font-semibold" style={{ color: 'var(--app-text)' }}>
                   {formatNum(value)}
                 </div>
-                <div className="text-xs mt-1" style={{ color: '#8b7355' }}>
+                <div className="text-xs mt-1" style={{ color: 'var(--app-text-secondary)' }}>
                   {c.label}
                 </div>
               </div>
@@ -243,10 +243,10 @@ export default function StatsPage() {
       {/* Calendar Heatmap */}
       <div
         className="rounded-lg p-5"
-        style={{ backgroundColor: '#faf7f2', border: '1px solid #e0d8c8' }}
+        style={{ backgroundColor: 'var(--app-surface)', border: '1px solid var(--app-border)' }}
       >
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-medium" style={{ color: '#5c4a2e' }}>书写日历</h3>
+          <h3 className="text-sm font-medium" style={{ color: 'var(--app-text)' }}>书写日历</h3>
           <div className="flex gap-1">
             {rangeOptions.map(o => (
               <button
@@ -254,9 +254,9 @@ export default function StatsPage() {
                 onClick={() => setRange(o.v)}
                 className="px-2.5 py-0.5 text-xs rounded transition-colors"
                 style={{
-                  backgroundColor: range === o.v ? '#c4956a' : 'transparent',
-                  color: range === o.v ? '#fff' : '#8b7355',
-                  border: range === o.v ? 'none' : '1px solid #d0c8b8',
+                  backgroundColor: range === o.v ? 'var(--app-accent)' : 'transparent',
+                  color: range === o.v ? 'var(--app-accent-text)' : 'var(--app-text-secondary)',
+                  border: range === o.v ? 'none' : '1px solid var(--app-border)',
                 }}
               >
                 {o.label}
@@ -270,29 +270,29 @@ export default function StatsPage() {
       {/* Time Distribution */}
       <div
         className="rounded-lg p-5"
-        style={{ backgroundColor: '#faf7f2', border: '1px solid #e0d8c8' }}
+        style={{ backgroundColor: 'var(--app-surface)', border: '1px solid var(--app-border)' }}
       >
-        <h3 className="text-sm font-medium mb-4" style={{ color: '#5c4a2e' }}>书写时段分布</h3>
+        <h3 className="text-sm font-medium mb-4" style={{ color: 'var(--app-text)' }}>书写时段分布</h3>
         {timeDistribution.length > 0 ? (
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={timeDistribution} margin={{ top: 4, left: -20, right: 4, bottom: 0 }}>
               <XAxis
                 dataKey="hour"
                 tickFormatter={(h: number) => (h % 2 === 0 ? `${h}时` : '')}
-                tick={{ fontSize: 11, fill: '#8b7355' }}
-                axisLine={{ stroke: '#d0c8b8' }}
+                tick={{ fontSize: 11, fill: 'var(--app-text-secondary)' }}
+                axisLine={{ stroke: 'var(--app-border)' }}
                 tickLine={false}
               />
               <YAxis
-                tick={{ fontSize: 11, fill: '#8b7355' }}
+                tick={{ fontSize: 11, fill: 'var(--app-text-secondary)' }}
                 axisLine={false}
                 tickLine={false}
                 allowDecimals={false}
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#faf7f2',
-                  border: '1px solid #e0d8c8',
+                  backgroundColor: 'var(--app-surface)',
+                  border: '1px solid var(--app-border)',
                   borderRadius: 8,
                   fontSize: 12,
                 }}
@@ -307,7 +307,7 @@ export default function StatsPage() {
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <p className="text-sm text-center py-8" style={{ color: '#8b7355' }}>暂无数据</p>
+          <p className="text-sm text-center py-8" style={{ color: 'var(--app-text-secondary)' }}>暂无数据</p>
         )}
       </div>
     </div>

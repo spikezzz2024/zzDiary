@@ -43,7 +43,7 @@ export default function FamilyPage() {
 
   const inputClass = `w-full rounded-lg border px-4 py-3 text-sm leading-relaxed resize-y outline-none transition-colors
     bg-[var(--paper-bg)] border-[var(--paper-border)] text-[var(--paper-text)]
-    placeholder:text-[var(--paper-text-secondary)] focus:border-[#c4b89a] focus:ring-1 focus:ring-[#c4b89a]`;
+    placeholder:text-[var(--paper-text-secondary)] focus:border-[var(--app-accent)] focus:ring-1 focus:ring-[var(--app-accent)]`;
 
   const labelClass = 'text-sm font-medium';
   const hintClass = 'text-xs text-[var(--paper-text-secondary)] mt-1';
@@ -108,7 +108,7 @@ export default function FamilyPage() {
           </div>
           <button onClick={() => setStarted(true)}
             className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium cursor-pointer transition-colors"
-            style={{ backgroundColor: '#5c4a2e', color: '#faf7f2' }}>
+            style={{ backgroundColor: 'var(--app-accent)', color: 'var(--app-accent-text)' }}>
             开始填写
           </button>
         </div>
@@ -164,7 +164,7 @@ export default function FamilyPage() {
         <div className="flex items-center gap-3 pt-1">
           <button onClick={handleSave} disabled={saving || !childhoodSummary.trim() || !significantEvents.trim()}
             className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ backgroundColor: '#5c4a2e', color: '#faf7f2' }}>
+            style={{ backgroundColor: 'var(--app-accent)', color: 'var(--app-accent-text)' }}>
             {saving && (
               <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <circle cx="12" cy="12" r="10" strokeOpacity={0.25} />
@@ -177,8 +177,8 @@ export default function FamilyPage() {
           <button onClick={distill} disabled={distilling || !background}
             className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed border"
             style={{
-              color: '#5c4a2e',
-              borderColor: '#c4b89a',
+              color: 'var(--app-accent)',
+              borderColor: 'var(--app-accent)',
               backgroundColor: 'transparent',
             }}>
             {distilling && (
@@ -209,17 +209,17 @@ export default function FamilyPage() {
         <div className="rounded-xl border p-6 space-y-3"
           style={{ backgroundColor: 'var(--paper-bg)', borderColor: 'var(--paper-border)' }}>
           <div className="flex items-center gap-2.5">
-            <svg className="w-5 h-5" style={{ color: '#c4943a' }} fill="none" viewBox="0 0 24 24"
+            <svg className="w-5 h-5" style={{ color: 'var(--app-accent)' }} fill="none" viewBox="0 0 24 24"
               stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round"
                 d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
             </svg>
-            <span className="text-sm font-medium" style={{ color: '#5c4a2e' }}>
+            <span className="text-sm font-medium" style={{ color: 'var(--app-text)' }}>
               AI 家庭影响洞察
             </span>
           </div>
           <blockquote className="text-sm leading-relaxed pl-4 border-l-2"
-            style={{ color: 'var(--paper-text)', borderColor: '#c4943a' }}>
+            style={{ color: 'var(--paper-text)', borderColor: 'var(--app-accent)' }}>
             {background.skillSummary}
           </blockquote>
         </div>

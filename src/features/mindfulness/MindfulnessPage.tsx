@@ -34,7 +34,7 @@ export default function MindfulnessPage() {
 
   const inputClass = `w-full rounded-lg border px-4 py-3 text-sm leading-relaxed resize-y outline-none transition-colors
     bg-[var(--paper-bg)] border-[var(--paper-border)] text-[var(--paper-text)]
-    placeholder:text-[var(--paper-text-secondary)] focus:border-[#c4b89a] focus:ring-1 focus:ring-[#c4b89a]`;
+    placeholder:text-[var(--paper-text-secondary)] focus:border-[var(--app-accent)] focus:ring-1 focus:ring-[var(--app-accent)]`;
 
   // --- Empty state (no recommendation active) ---
   if (!recommendation) {
@@ -77,7 +77,7 @@ export default function MindfulnessPage() {
             onClick={() => handleGetRecommendation()}
             disabled={recommending}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ backgroundColor: '#5c4a2e', color: '#faf7f2' }}
+            style={{ backgroundColor: 'var(--app-accent)', color: 'var(--app-accent-text)' }}
           >
             {recommending && (
               <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

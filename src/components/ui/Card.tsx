@@ -7,7 +7,7 @@ interface Props {
 
 export default function Card({ children, className = '' }: Props) {
   return (
-    <div className={`rounded-xl border border-gray-200 bg-white p-6 shadow-sm ${className}`}>
+    <div className={`rounded-xl border border-[var(--app-border)] bg-[var(--app-surface)] p-6 shadow-sm ${className}`}>
       {children}
     </div>
   );

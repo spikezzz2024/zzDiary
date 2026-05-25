@@ -212,7 +212,7 @@ export default function BreathingExercise({ exerciseId, recommendationText, onCo
         {(running || (!running && totalSeconds > 0)) && !completed && (
           <button onClick={handleComplete}
             className="px-5 py-2 rounded-lg text-sm font-medium cursor-pointer transition-colors"
-            style={{ backgroundColor: '#5c4a2e', color: '#faf7f2' }}>
+            style={{ backgroundColor: 'var(--app-accent)', color: 'var(--app-accent-text)' }}>
             完成练习
           </button>
         )}

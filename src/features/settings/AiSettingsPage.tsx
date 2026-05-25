@@ -4,8 +4,9 @@ import Card from '../../components/ui/Card';
 import Input from '../../components/ui/Input';
 import { useSettingsStore } from './settings.store';
 import ExportSection from './ExportSection';
+import AppearanceSection from '../theme/AppearanceSection';
 
-export default function AiSettingsPage() {
+export default function AiSettingsPage(): React.ReactElement {
   const { ai, ollamaAvailable, loading, saving, fetchAiSettings, updateAiSettings, checkOllama } =
     useSettingsStore();
 
@@ -24,31 +25,35 @@ export default function AiSettingsPage() {
     }
   }, [ai]);
 
-  const handleModeChange = async (mode: 'ollama' | 'deepseek') => {
+  const handleModeChange = async (mode: 'ollama' | 'deepseek'): Promise<void> => {
     await updateAiSettings({ mode });
   };
 
-  const handleSaveDeepseek = async () => {
+  const handleSaveDeepseek = async (): Promise<void> => {
     await updateAiSettings({ mode: 'deepseek', deepseekApiKey: deepseekKey });
   };
 
-  const handleSaveOllama = async () => {
+  const handleSaveOllama = async (): Promise<void> => {
     await updateAiSettings({ ollamaModel });
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-t-transparent"
+          style={{ borderColor: 'var(--app-accent)', borderTopColor: 'transparent' }} />
       </div>
     );
   }
 
+  const textColor = { color: 'var(--app-text)' };
+  const secondaryColor = { color: 'var(--app-text-secondary)' };
+
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-gray-900">AI 模型设置</h2>
-        <p className="mt-1 text-sm text-gray-500">选择情绪分析使用的 AI 引擎</p>
+        <h2 className="text-xl font-semibold" style={textColor}>AI 模型设置</h2>
+        <p className="mt-1 text-sm" style={secondaryColor}>选择情绪分析使用的 AI 引擎</p>
       </div>
 
       {/* Mode selection */}
@@ -60,11 +65,12 @@ export default function AiSettingsPage() {
               name="mode"
               checked={ai?.mode === 'ollama'}
               onChange={() => handleModeChange('ollama')}
-              className="mt-0.5 h-4 w-4 text-indigo-600"
+              className="mt-0.5 h-4 w-4"
+              style={{ accentColor: 'var(--app-accent)' }}
             />
             <div className="flex-1">
-              <span className="font-medium text-gray-900">Ollama 本地模型（推荐）</span>
-              <p className="text-sm text-gray-500">
+              <span className="font-medium" style={textColor}>Ollama 本地模型（推荐）</span>
+              <p className="text-sm" style={secondaryColor}>
                 完全免费，数据不出本机。首次使用需要安装 Ollama 并下载模型。
               </p>
             </div>
@@ -76,11 +82,12 @@ export default function AiSettingsPage() {
               name="mode"
               checked={ai?.mode === 'deepseek'}
               onChange={() => handleModeChange('deepseek')}
-              className="mt-0.5 h-4 w-4 text-indigo-600"
+              className="mt-0.5 h-4 w-4"
+              style={{ accentColor: 'var(--app-accent)' }}
             />
             <div className="flex-1">
-              <span className="font-medium text-gray-900">DeepSeek 云端 API</span>
-              <p className="text-sm text-gray-500">
+              <span className="font-medium" style={textColor}>DeepSeek 云端 API</span>
+              <p className="text-sm" style={secondaryColor}>
                 分析质量更高，需要联网。新用户注册即送免费额度。
               </p>
             </div>
@@ -91,13 +98,13 @@ export default function AiSettingsPage() {
       {/* Ollama section */}
       {ai?.mode === 'ollama' && (
         <Card>
-          <h3 className="mb-3 font-medium text-gray-900">Ollama 配置</h3>
+          <h3 className="mb-3 font-medium" style={textColor}>Ollama 配置</h3>
 
           <div className="mb-4 flex items-center gap-2 text-sm">
             <span
               className={`h-2 w-2 rounded-full ${ollamaAvailable ? 'bg-green-500' : 'bg-red-400'}`}
             />
-            <span className="text-gray-600">
+            <span style={secondaryColor}>
               {ollamaAvailable ? 'Ollama 服务已连接' : 'Ollama 服务未连接'}
             </span>
           </div>
@@ -153,7 +160,7 @@ export default function AiSettingsPage() {
       {/* Deepseek section */}
       {ai?.mode === 'deepseek' && (
         <Card>
-          <h3 className="mb-3 font-medium text-gray-900">DeepSeek API 配置</h3>
+          <h3 className="mb-3 font-medium" style={textColor}>DeepSeek API 配置</h3>
 
           <div className="space-y-4">
             <Input
@@ -189,6 +196,11 @@ export default function AiSettingsPage() {
           </div>
         </Card>
       )}
+
+      {/* Appearance section */}
+      <div className="mt-8">
+        <AppearanceSection />
+      </div>
 
       {/* Export section */}
       <div className="mt-8">

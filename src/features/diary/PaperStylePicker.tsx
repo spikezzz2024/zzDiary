@@ -11,6 +11,10 @@ const MATERIALS: { key: PaperMaterial; label: string; desc: string }[] = [
 const COLORS: { key: PaperColor; label: string; preview: string }[] = [
   { key: 'classic', label: '经典米黄', preview: '#fdf5e6' },
   { key: 'rice', label: '宣纸素白', preview: '#faf8f5' },
+  { key: 'warm', label: '暖桃', preview: '#fef7f0' },
+  { key: 'forest', label: '林间绿', preview: '#f2f5ee' },
+  { key: 'lavender', label: '薰衣草', preview: '#f6f3fa' },
+  { key: 'slate', label: '素灰', preview: '#f5f4f2' },
   { key: 'dark', label: '暗夜暖灯', preview: '#2c2416' },
   { key: 'blue', label: '护眼青绿', preview: '#e8f0e8' },
 ];
@@ -105,7 +109,7 @@ export default function PaperStylePicker() {
             <p className="text-xs tracking-wide mb-2.5" style={{ color: 'var(--paper-text-secondary)' }}>
               纸张颜色
             </p>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {COLORS.map((c) => (
                 <button
                   key={c.key}
